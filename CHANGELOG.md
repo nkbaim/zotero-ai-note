@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.5 — 2026-09-20
+
+- Disable DeepSeek thinking mode for connection tests and paper summaries so reasoning tokens cannot consume the entire output allowance.
+- Increase the connection-test output allowance and support text-part response arrays.
+- Include safe response diagnostics such as `finish_reason` and reasoning-token usage when an API returns no visible text.
+
 ## 0.2.4 — 2026-09-20
 
 - Add eight persistent note-section checkboxes to the settings page, enabled by default.

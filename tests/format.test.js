@@ -79,7 +79,7 @@ assert.match(html, /200,000/);
   assert.equal(lastRequest.options.headers.Authorization, "Bearer deepseek-key");
   const body = JSON.parse(lastRequest.options.body);
   assert.equal(body.model, "deepseek-flash");
-  assert.equal(body.thinking, undefined);
+  assert.deepEqual(body.thinking, { type: "disabled" });
   assert.match(body.messages[1].content, /PDF text/);
   assert.match(body.messages[0].content, /研究概览、研究问题、方法与数据、主要发现、创新与亮点、局限性、可复用的启示、关键词/);
 
@@ -110,14 +110,28 @@ assert.match(html, /200,000/);
   });
   assert.equal(lastRequest.url, "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions");
   assert.equal(lastRequest.options.headers.Authorization, "Bearer qwen-key");
-  assert.equal(JSON.parse(lastRequest.options.body).model, "qwen-plus");
+  const qwenBody = JSON.parse(lastRequest.options.body);
+  assert.equal(qwenBody.model, "qwen-plus");
+  assert.equal(qwenBody.thinking, undefined);
 
   const connectionReply = await plugin.testProviderConnection(qwen);
   assert.equal(connectionReply, "## 总结\n- 有效");
   const connectionBody = JSON.parse(lastRequest.options.body);
-  assert.equal(connectionBody.max_tokens, 8);
+  assert.equal(connectionBody.max_tokens, 512);
   assert.equal(connectionBody.messages[0].content, "Reply with exactly: OK");
+  assert.equal(connectionBody.thinking, undefined);
   assert.equal(lastRequest.options.timeout, 30000);
+
+  await plugin.testProviderConnection(deepseek);
+  const deepseekConnectionBody = JSON.parse(lastRequest.options.body);
+  assert.deepEqual(deepseekConnectionBody.thinking, { type: "disabled" });
+  assert.equal(plugin.extractAssistantText({
+    choices: [{ message: { content: [{ type: "text", text: " OK " }] } }]
+  }), "OK");
+  assert.match(plugin.emptyResponseMessage(deepseek, {
+    choices: [{ finish_reason: "length", message: { content: null, reasoning_content: "thinking" } }],
+    usage: { completion_tokens_details: { reasoning_tokens: 512 } }
+  }, "文本内容"), /finish_reason=length.*推理 tokens=512.*仅返回了推理内容/);
 
   assert.ok(preferenceReads.length > 0);
   assert.ok(preferenceReads.every(({ global }) => global === true));

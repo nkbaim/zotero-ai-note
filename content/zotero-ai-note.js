@@ -223,24 +223,52 @@ var ZoteroAINote = {
       max_tokens: 3000,
       stream: false
     };
+    if (provider.id === "deepseek") body.thinking = { type: "disabled" };
 
     const data = await this.sendChatRequest(provider, body, 180000);
-    const summary = data?.choices?.[0]?.message?.content?.trim();
-    if (!summary) throw new Error(`${provider.label} API 未返回可用的总结内容`);
+    const summary = this.extractAssistantText(data);
+    if (!summary) throw new Error(this.emptyResponseMessage(provider, data, "总结内容"));
     return summary;
   },
 
   async testProviderConnection(provider) {
-    const data = await this.sendChatRequest(provider, {
+    const body = {
       model: provider.model,
       messages: [{ role: "user", content: "Reply with exactly: OK" }],
       temperature: 0,
-      max_tokens: 8,
+      max_tokens: 512,
       stream: false
-    }, 30000);
-    const reply = data?.choices?.[0]?.message?.content?.trim();
-    if (!reply) throw new Error(`${provider.label} API 已响应，但未返回文本内容`);
+    };
+    if (provider.id === "deepseek") body.thinking = { type: "disabled" };
+
+    const data = await this.sendChatRequest(provider, body, 30000);
+    const reply = this.extractAssistantText(data);
+    if (!reply) throw new Error(this.emptyResponseMessage(provider, data, "文本内容"));
     return reply;
+  },
+
+  extractAssistantText(data) {
+    const content = data?.choices?.[0]?.message?.content;
+    if (typeof content === "string") return content.trim();
+    if (Array.isArray(content)) {
+      return content
+        .map((part) => typeof part === "string" ? part : part?.text || "")
+        .join("")
+        .trim();
+    }
+    const fallback = data?.choices?.[0]?.text ?? data?.output_text;
+    return typeof fallback === "string" ? fallback.trim() : "";
+  },
+
+  emptyResponseMessage(provider, data, expected) {
+    const choice = data?.choices?.[0];
+    const details = [];
+    if (choice?.finish_reason) details.push(`finish_reason=${choice.finish_reason}`);
+    const reasoningTokens = data?.usage?.completion_tokens_details?.reasoning_tokens;
+    if (Number.isFinite(reasoningTokens)) details.push(`推理 tokens=${reasoningTokens}`);
+    if (choice?.message?.reasoning_content) details.push("仅返回了推理内容");
+    const suffix = details.length ? `（${details.join("，")}）` : "";
+    return `${provider.label} API 已响应，但未返回${expected}${suffix}`;
   },
 
   async sendChatRequest(provider, body, timeout) {
