@@ -9,8 +9,15 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/nkbaim/zotero-ai-note/releases/latest"><img src="https://img.shields.io/github/v/release/nkbaim/zotero-ai-note" alt="最新版本"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/nkbaim/zotero-ai-note" alt="MIT License"></a>
+  <a href="https://github.com/nkbaim/zotero-ai-note/graphs/contributors"><img src="https://img.shields.io/github/contributors/nkbaim/zotero-ai-note" alt="贡献者"></a>
+</p>
+
+<p align="center">
   <a href="https://github.com/nkbaim/zotero-ai-note/releases/latest">下载最新版</a> ·
-  <a href="https://github.com/nkbaim/zotero-ai-note/issues">问题反馈</a>
+  <a href="https://github.com/nkbaim/zotero-ai-note/issues">问题反馈</a> ·
+  <a href="CONTRIBUTING.md">参与贡献</a>
 </p>
 
 ## 功能
@@ -191,6 +198,12 @@ zotero-ai-note/
 
 创建与 `manifest.json` 版本一致的标签，例如 `v0.2.3`。GitHub Actions 会运行检查、构建 XPI，并创建对应的 GitHub Release。
 
+## 贡献者
+
+- [Yang Du (@nkbaim)](https://github.com/nkbaim) — 创建者与维护者
+
+欢迎提交问题和改进建议。代码贡献流程请参阅 [CONTRIBUTING.md](CONTRIBUTING.md)，贡献者名单见 [CONTRIBUTORS.md](CONTRIBUTORS.md)。
+
 ## 许可证
 
-[MIT License](LICENSE)
+本项目采用 [MIT License](LICENSE)。允许使用、复制、修改、合并、发布和分发，但须保留原版权及许可声明。
