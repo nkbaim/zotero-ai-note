@@ -87,4 +87,21 @@
     <html:p>插件只发送提取出的文本。较长 PDF 会保留开头和结尾，并在笔记中标明内容已截断。</html:p>
     <html:p>API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
   </groupbox>
+
+  <groupbox>
+    <label><html:h2>笔记内容</html:h2></label>
+    <html:p>选择 AI 笔记需要包含的部分。默认全部选中，生成时会按照下列顺序输出。</html:p>
+
+    <html:div style="display: grid; grid-template-columns: repeat(2, minmax(12em, 1fr)); gap: 8px 24px;">
+      <html:label><html:input type="checkbox" preference="extensions.zotero-ai-note.sections.overview"/> 研究概览</html:label>
+      <html:label><html:input type="checkbox" preference="extensions.zotero-ai-note.sections.question"/> 研究问题</html:label>
+      <html:label><html:input type="checkbox" preference="extensions.zotero-ai-note.sections.methods"/> 方法与数据</html:label>
+      <html:label><html:input type="checkbox" preference="extensions.zotero-ai-note.sections.findings"/> 主要发现</html:label>
+      <html:label><html:input type="checkbox" preference="extensions.zotero-ai-note.sections.highlights"/> 创新与亮点</html:label>
+      <html:label><html:input type="checkbox" preference="extensions.zotero-ai-note.sections.limitations"/> 局限性</html:label>
+      <html:label><html:input type="checkbox" preference="extensions.zotero-ai-note.sections.implications"/> 可复用的启示</html:label>
+      <html:label><html:input type="checkbox" preference="extensions.zotero-ai-note.sections.keywords"/> 关键词</html:label>
+    </html:div>
+    <html:p>开始总结时至少需要选择一项。</html:p>
+  </groupbox>
 </vbox>

@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Zotero AI Note",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Summarize selected PDF papers with Qwen or DeepSeek and save the result as a Zotero child note.",
   "author": "Duyang",
   "homepage_url": "https://github.com/nkbaim/zotero-ai-note",

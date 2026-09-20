@@ -11,7 +11,15 @@ const preferences = {
   "extensions.zotero-ai-note.qwen.baseURL": "https://dashscope.aliyuncs.com/compatible-mode/v1",
   "extensions.zotero-ai-note.qwen.model": "qwen-plus",
   "extensions.zotero-ai-note.language": "中文",
-  "extensions.zotero-ai-note.maxChars": 10000
+  "extensions.zotero-ai-note.maxChars": 10000,
+  "extensions.zotero-ai-note.sections.overview": true,
+  "extensions.zotero-ai-note.sections.question": true,
+  "extensions.zotero-ai-note.sections.methods": true,
+  "extensions.zotero-ai-note.sections.findings": true,
+  "extensions.zotero-ai-note.sections.highlights": true,
+  "extensions.zotero-ai-note.sections.limitations": true,
+  "extensions.zotero-ai-note.sections.implications": true,
+  "extensions.zotero-ai-note.sections.keywords": true
 };
 let lastRequest;
 const preferenceReads = [];
@@ -73,6 +81,20 @@ assert.match(html, /200,000/);
   assert.equal(body.model, "deepseek-flash");
   assert.equal(body.thinking, undefined);
   assert.match(body.messages[1].content, /PDF text/);
+  assert.match(body.messages[0].content, /研究概览、研究问题、方法与数据、主要发现、创新与亮点、局限性、可复用的启示、关键词/);
+
+  preferences["extensions.zotero-ai-note.sections.keywords"] = false;
+  await plugin.requestSummary({
+    item: {
+      getField: () => "",
+      getCreators: () => []
+    },
+    text: "PDF text without keywords",
+    truncated: false,
+    originalLength: 25,
+    provider: deepseek
+  });
+  assert.doesNotMatch(JSON.parse(lastRequest.options.body).messages[0].content, /关键词/);
 
   preferences["extensions.zotero-ai-note.provider"] = "qwen";
   const qwen = plugin.getProviderConfig();
@@ -99,6 +121,20 @@ assert.match(html, /200,000/);
 
   assert.ok(preferenceReads.length > 0);
   assert.ok(preferenceReads.every(({ global }) => global === true));
+
+  for (const key of Object.keys(preferences).filter((key) => key.includes(".sections."))) {
+    preferences[key] = false;
+  }
+  await assert.rejects(
+    plugin.requestSummary({
+      item: { getField: () => "", getCreators: () => [] },
+      text: "PDF text",
+      truncated: false,
+      originalLength: 8,
+      provider: qwen
+    }),
+    /至少需要选择一个笔记部分/
+  );
 
   sandbox.Zotero.PDFWorker = {
     getFullText: async () => ({ text: "A".repeat(12000) })

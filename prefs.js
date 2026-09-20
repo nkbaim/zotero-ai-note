@@ -7,3 +7,11 @@ pref("extensions.zotero-ai-note.qwen.baseURL", "https://dashscope.aliyuncs.com/c
 pref("extensions.zotero-ai-note.qwen.model", "qwen-plus");
 pref("extensions.zotero-ai-note.language", "中文");
 pref("extensions.zotero-ai-note.maxChars", 120000);
+pref("extensions.zotero-ai-note.sections.overview", true);
+pref("extensions.zotero-ai-note.sections.question", true);
+pref("extensions.zotero-ai-note.sections.methods", true);
+pref("extensions.zotero-ai-note.sections.findings", true);
+pref("extensions.zotero-ai-note.sections.highlights", true);
+pref("extensions.zotero-ai-note.sections.limitations", true);
+pref("extensions.zotero-ai-note.sections.implications", true);
+pref("extensions.zotero-ai-note.sections.keywords", true);

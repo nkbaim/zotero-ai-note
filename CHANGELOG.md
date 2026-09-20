@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4 — 2026-09-20
+
+- Add eight persistent note-section checkboxes to the settings page, enabled by default.
+- Generate only the selected sections and preserve their configured order.
+- Stop before sending an API request when no note section is selected.
+
 ## 0.2.3 — 2026-09-20
 
 - Add DeepSeek and Qwen provider selection with separate credentials and endpoints.
