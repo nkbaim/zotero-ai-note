@@ -1,0 +1,9 @@
+pref("extensions.zotero-ai-note.provider", "deepseek");
+pref("extensions.zotero-ai-note.deepseek.apiKey", "");
+pref("extensions.zotero-ai-note.deepseek.baseURL", "https://api.deepseek.com");
+pref("extensions.zotero-ai-note.deepseek.model", "deepseek-flash");
+pref("extensions.zotero-ai-note.qwen.apiKey", "");
+pref("extensions.zotero-ai-note.qwen.baseURL", "https://dashscope.aliyuncs.com/compatible-mode/v1");
+pref("extensions.zotero-ai-note.qwen.model", "qwen-plus");
+pref("extensions.zotero-ai-note.language", "中文");
+pref("extensions.zotero-ai-note.maxChars", 120000);

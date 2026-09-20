@@ -1,0 +1,90 @@
+<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+      xmlns:html="http://www.w3.org/1999/xhtml">
+  <groupbox>
+    <label><html:h2>AI 模型</html:h2></label>
+    <html:p>选择用于分析 PDF 的 AI 服务。每个服务使用独立的 API Key、API 地址和模型名。</html:p>
+
+    <label value="AI 服务" control="zotero-ai-note-provider"/>
+    <html:select id="zotero-ai-note-provider"
+                 preference="extensions.zotero-ai-note.provider">
+      <html:option value="deepseek">DeepSeek</html:option>
+      <html:option value="qwen">Qwen（通义千问）</html:option>
+    </html:select>
+
+    <hbox align="center" style="margin-top: 10px; gap: 10px;">
+      <button id="zotero-ai-note-test-connection"
+              label="测试当前模型连接"
+              oncommand="ZoteroAINotePreferences.testConnection();"/>
+      <html:span id="zotero-ai-note-test-status" role="status"></html:span>
+    </hbox>
+  </groupbox>
+
+  <groupbox>
+    <label><html:h2>DeepSeek</html:h2></label>
+
+    <label value="API Key" control="zotero-ai-note-deepseek-api-key"/>
+    <html:input id="zotero-ai-note-deepseek-api-key"
+                type="password"
+                preference="extensions.zotero-ai-note.deepseek.apiKey"
+                placeholder="sk-..."
+                style="width: 32em;"/>
+
+    <label value="API 地址" control="zotero-ai-note-deepseek-base-url"/>
+    <html:input id="zotero-ai-note-deepseek-base-url"
+                type="url"
+                preference="extensions.zotero-ai-note.deepseek.baseURL"
+                style="width: 38em;"/>
+
+    <label value="模型" control="zotero-ai-note-deepseek-model"/>
+    <html:input id="zotero-ai-note-deepseek-model"
+                type="text"
+                preference="extensions.zotero-ai-note.deepseek.model"
+                style="width: 20em;"/>
+  </groupbox>
+
+  <groupbox>
+    <label><html:h2>Qwen（阿里云百炼）</html:h2></label>
+
+    <label value="API Key" control="zotero-ai-note-qwen-api-key"/>
+    <html:input id="zotero-ai-note-qwen-api-key"
+                type="password"
+                preference="extensions.zotero-ai-note.qwen.apiKey"
+                placeholder="sk-..."
+                style="width: 32em;"/>
+
+    <label value="API 地址" control="zotero-ai-note-qwen-base-url"/>
+    <html:input id="zotero-ai-note-qwen-base-url"
+                type="url"
+                preference="extensions.zotero-ai-note.qwen.baseURL"
+                style="width: 38em;"/>
+    <html:p>阿里云不同地域可能需要使用包含 Workspace ID 的专属地址，可直接在此修改。</html:p>
+
+    <label value="模型" control="zotero-ai-note-qwen-model"/>
+    <html:input id="zotero-ai-note-qwen-model"
+                type="text"
+                preference="extensions.zotero-ai-note.qwen.model"
+                style="width: 20em;"/>
+  </groupbox>
+
+  <groupbox>
+    <label><html:h2>总结设置</html:h2></label>
+
+    <label value="输出语言" control="zotero-ai-note-language"/>
+    <html:select id="zotero-ai-note-language"
+                 preference="extensions.zotero-ai-note.language">
+      <html:option value="中文">中文</html:option>
+      <html:option value="English">English</html:option>
+    </html:select>
+
+    <label value="最多发送的 PDF 字符数" control="zotero-ai-note-max-chars"/>
+    <html:input id="zotero-ai-note-max-chars"
+                type="number"
+                min="10000"
+                max="500000"
+                step="10000"
+                preference="extensions.zotero-ai-note.maxChars"
+                style="width: 10em;"/>
+    <html:p>插件只发送提取出的文本。较长 PDF 会保留开头和结尾，并在笔记中标明内容已截断。</html:p>
+    <html:p>API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
+  </groupbox>
+</vbox>
