@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.6 — 2026-09-20
+
+- Show input and output token usage after each paper finishes.
+- Keep a running token total for the current batch and show the final total in the progress window.
+- Support both Chat Completions (`prompt_tokens` / `completion_tokens`) and Responses-style (`input_tokens` / `output_tokens`) usage fields.
+- Report when an API response omits usage data instead of estimating it.
+
 ## 0.2.5 — 2026-09-20
 
 - Disable DeepSeek thinking mode for connection tests and paper summaries so reasoning tokens cannot consume the entire output allowance.

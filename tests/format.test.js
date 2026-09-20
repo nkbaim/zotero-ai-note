@@ -38,7 +38,8 @@ const sandbox = {
         lastRequest = { method, url, options };
         return {
           responseText: JSON.stringify({
-            choices: [{ message: { content: "## 总结\n- 有效" } }]
+            choices: [{ message: { content: "## 总结\n- 有效" } }],
+            usage: { prompt_tokens: 120, completion_tokens: 30, total_tokens: 150 }
           })
         };
       }
@@ -63,7 +64,7 @@ assert.match(html, /200,000/);
 
 (async () => {
   const deepseek = plugin.getProviderConfig();
-  const summary = await plugin.requestSummary({
+  const summaryResult = await plugin.requestSummary({
     item: {
       getField: (field) => ({ title: "Test", date: "2026" })[field] || "",
       getCreators: () => [{ firstName: "Ada", lastName: "Lovelace" }]
@@ -73,7 +74,9 @@ assert.match(html, /200,000/);
     originalLength: 8,
     provider: deepseek
   });
-  assert.equal(summary, "## 总结\n- 有效");
+  assert.equal(summaryResult.summary, "## 总结\n- 有效");
+  assert.equal(summaryResult.usage.input, 120);
+  assert.equal(summaryResult.usage.output, 30);
   assert.equal(lastRequest.method, "POST");
   assert.equal(lastRequest.url, "https://api.deepseek.com/chat/completions");
   assert.equal(lastRequest.options.headers.Authorization, "Bearer deepseek-key");
@@ -128,6 +131,12 @@ assert.match(html, /200,000/);
   assert.equal(plugin.extractAssistantText({
     choices: [{ message: { content: [{ type: "text", text: " OK " }] } }]
   }), "OK");
+  const alternateUsage = plugin.getTokenUsage({
+    usage: { input_tokens: 55, output_tokens: 12 }
+  });
+  assert.equal(alternateUsage.input, 55);
+  assert.equal(alternateUsage.output, 12);
+  assert.equal(plugin.getTokenUsage({}), null);
   assert.match(plugin.emptyResponseMessage(deepseek, {
     choices: [{ finish_reason: "length", message: { content: null, reasoning_content: "thinking" } }],
     usage: { completion_tokens_details: { reasoning_tokens: 512 } }

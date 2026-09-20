@@ -75,13 +75,14 @@ var ZoteroAINote = {
 
     let completed = 0;
     const failures = [];
+    const taskUsage = { input: 0, output: 0, reported: 0, missing: 0 };
     try {
       for (const { item, pdf } of targets) {
         const title = item.getField("title") || pdf.getField("title") || "未命名文献";
         progress.addDescription(`正在处理：${title}`);
         try {
           const { text, truncated, originalLength } = await this.extractPDFText(pdf);
-          const summary = await this.requestSummary({
+          const { summary, usage } = await this.requestSummary({
             item,
             text,
             truncated,
@@ -90,6 +91,18 @@ var ZoteroAINote = {
             sections
           });
           await this.createChildNote(item, summary, { truncated, originalLength, provider });
+          if (usage) {
+            taskUsage.input += usage.input;
+            taskUsage.output += usage.output;
+            taskUsage.reported++;
+            progress.addDescription(
+              `Token：本篇输入 ${usage.input.toLocaleString()}，输出 ${usage.output.toLocaleString()}；`
+              + `本次累计输入 ${taskUsage.input.toLocaleString()}，输出 ${taskUsage.output.toLocaleString()}。`
+            );
+          } else {
+            taskUsage.missing++;
+            progress.addDescription("Token：当前 API 响应未提供用量统计。");
+          }
           completed++;
         } catch (error) {
           Zotero.logError(error);
@@ -99,7 +112,16 @@ var ZoteroAINote = {
     } finally {
       this.busy = false;
       progress.addDescription(`完成：成功 ${completed} 篇，失败 ${failures.length} 篇。`);
-      progress.startCloseTimer(failures.length ? 10000 : 5000);
+      if (taskUsage.reported) {
+        const missing = taskUsage.missing ? `；另有 ${taskUsage.missing} 篇未返回统计` : "";
+        progress.addDescription(
+          `本次任务 Token：输入 ${taskUsage.input.toLocaleString()}，`
+          + `输出 ${taskUsage.output.toLocaleString()}${missing}。`
+        );
+      } else if (completed) {
+        progress.addDescription("本次任务 Token：API 未返回用量统计。");
+      }
+      progress.startCloseTimer(10000);
     }
 
     if (failures.length) {
@@ -228,7 +250,7 @@ var ZoteroAINote = {
     const data = await this.sendChatRequest(provider, body, 180000);
     const summary = this.extractAssistantText(data);
     if (!summary) throw new Error(this.emptyResponseMessage(provider, data, "总结内容"));
-    return summary;
+    return { summary, usage: this.getTokenUsage(data) };
   },
 
   async testProviderConnection(provider) {
@@ -258,6 +280,19 @@ var ZoteroAINote = {
     }
     const fallback = data?.choices?.[0]?.text ?? data?.output_text;
     return typeof fallback === "string" ? fallback.trim() : "";
+  },
+
+  getTokenUsage(data) {
+    const usage = data?.usage;
+    if (!usage) return null;
+    const rawInput = usage.prompt_tokens ?? usage.input_tokens;
+    const rawOutput = usage.completion_tokens ?? usage.output_tokens;
+    const input = Number(rawInput);
+    const output = Number(rawOutput);
+    const hasInput = Number.isFinite(input) && input >= 0;
+    const hasOutput = Number.isFinite(output) && output >= 0;
+    if (!hasInput && !hasOutput) return null;
+    return { input: hasInput ? input : 0, output: hasOutput ? output : 0 };
   },
 
   emptyResponseMessage(provider, data, expected) {
