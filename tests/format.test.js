@@ -23,6 +23,8 @@ const preferences = {
   "extensions.zotero-ai-note.sections.keywords": true
 };
 let lastRequest;
+let currentName = "Alice <Admin>";
+let currentUsername = "alice";
 const requestHistory = [];
 const queuedResponses = [];
 const allSections = ["研究概览", "研究问题", "方法与数据", "主要发现", "创新与亮点", "局限性", "可复用的启示", "关键词"];
@@ -32,6 +34,10 @@ const sandbox = {
   rootURI: "file:///test/",
   Services: { env: { get: () => "" } },
   Zotero: {
+    Users: {
+      getCurrentName: () => currentName,
+      getCurrentUsername: () => currentUsername
+    },
     Prefs: {
       get: (key, global) => {
         preferenceReads.push({ key, global });
@@ -61,22 +67,35 @@ vm.runInContext(fs.readFileSync("content/zotero-ai-note.js", "utf8"), sandbox);
 const plugin = sandbox.Zotero.ZoteroAINote;
 const html = plugin.markdownToNoteHTML(
   "## 主要发现\n- **有效** <script>alert(1)</script>\n1. `AUC` 为 0.91",
-  { truncated: true, originalLength: 200000 }
+  { truncated: true, originalLength: 200000, generatedAt: new Date("2026-09-22T09:30:00+08:00") }
 );
 
+assert.match(html, /生成人：Alice &lt;Admin&gt;/);
+assert.match(html, /生成时间：2026/);
+assert.match(html, /所用模型：DeepSeek \/ deepseek-flash/);
+assert.ok(html.indexOf("<h1>AI 文献总结</h1>") < html.indexOf("生成人："));
+assert.ok(html.indexOf("所用模型：") < html.indexOf("<h3>主要发现</h3>"));
+assert.equal(html.match(/DeepSeek \/ deepseek-flash/g).length, 1);
 assert.match(html, /<h3>主要发现<\/h3>/);
 assert.match(html, /<strong>有效<\/strong>/);
 assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
 assert.doesNotMatch(html, /<script>/);
 assert.match(html, /<code>AUC<\/code>/);
 assert.match(html, /200,000/);
+currentName = "";
+assert.match(plugin.markdownToNoteHTML("内容"), /生成人：alice/);
+currentUsername = "";
+assert.match(plugin.markdownToNoteHTML("内容"), /生成人：当前用户/);
+currentName = "Alice <Admin>";
+currentUsername = "alice";
 const warnedHtml = plugin.markdownToNoteHTML("## 研究概览\n部分内容", {
   warning: "⚠️ 内容被截断 <script>alert(1)</script>",
   provider: { label: "DeepSeek", model: "deepseek-flash" }
 });
 assert.match(warnedHtml, /⚠️ 内容被截断 &lt;script&gt;alert\(1\)&lt;\/script&gt;/);
-assert.ok(warnedHtml.indexOf("部分内容") < warnedHtml.indexOf("由 DeepSeek"));
-assert.ok(warnedHtml.indexOf("由 DeepSeek") < warnedHtml.indexOf("⚠️ 内容被截断"));
+assert.ok(warnedHtml.indexOf("所用模型：DeepSeek / deepseek-flash") < warnedHtml.indexOf("部分内容"));
+assert.ok(warnedHtml.indexOf("部分内容") < warnedHtml.indexOf("本笔记由 AI 自动生成"));
+assert.ok(warnedHtml.indexOf("本笔记由 AI 自动生成") < warnedHtml.indexOf("⚠️ 内容被截断"));
 assert.ok(warnedHtml.indexOf("⚠️ 内容被截断") < warnedHtml.indexOf("</div>"));
 
 (async () => {

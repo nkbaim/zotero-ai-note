@@ -411,9 +411,13 @@ var ZoteroAINote = {
     return note;
   },
 
-  markdownToNoteHTML(markdown, { truncated = false, originalLength = 0, provider = null, warning = null } = {}) {
+  markdownToNoteHTML(markdown, { truncated = false, originalLength = 0, provider = null, warning = null, generatedAt = new Date() } = {}) {
     const lines = String(markdown || "").replace(/\r\n?/g, "\n").split("\n");
     const html = ['<div data-schema-version="9">', "<h1>AI 文献总结</h1>"];
+    const activeProvider = provider || this.getProviderConfig();
+    const creator = Zotero.Users?.getCurrentName?.() || Zotero.Users?.getCurrentUsername?.() || "当前用户";
+    const timestamp = generatedAt.toLocaleString("zh-CN", { hour12: false });
+    html.push(`<p><em>生成人：${this.escapeHTML(creator)}<br>生成时间：${this.escapeHTML(timestamp)}<br>所用模型：${this.escapeHTML(`${activeProvider.label} / ${activeProvider.model}`)}</em></p>`);
     let listType = null;
 
     const closeList = () => {
@@ -454,12 +458,10 @@ var ZoteroAINote = {
     }
     closeList();
 
-    const activeProvider = provider || this.getProviderConfig();
-    const generatedBy = this.escapeHTML(`${activeProvider.label} / ${activeProvider.model}`);
     const limitation = truncated
-      ? `；PDF 原文约 ${Number(originalLength).toLocaleString()} 字符，本次输入经过截断`
+      ? `PDF 原文约 ${Number(originalLength).toLocaleString()} 字符，本次输入经过截断。`
       : "";
-    html.push(`<p><em>由 ${generatedBy} 自动生成${limitation}。请对照原文核验关键信息。</em></p>`);
+    html.push(`<p><em>本笔记由 AI 自动生成。${limitation}请对照原文核验关键信息。</em></p>`);
     if (warning) html.push(`<p><strong>${this.escapeHTML(warning)}</strong></p>`);
     html.push("</div>");
     return html.join("\n");
