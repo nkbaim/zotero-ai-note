@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.8 — 2026-09-22
+
+- Tell the model the configured output limit and per-section budget in the first request, targeting 75% of the limit.
+- Remove automatic retry to avoid an extra API call when a summary is truncated or incomplete.
+- Continue rejecting incomplete summaries instead of saving partial notes.
+
 ## 0.2.7 — 2026-09-22
 
 - Add a per-paper output-token limit in settings (default 3000, range 1000–16000).

@@ -95,7 +95,8 @@ assert.match(html, /200,000/);
   assert.deepEqual(body.thinking, { type: "disabled" });
   assert.match(body.messages[1].content, /PDF text/);
   assert.match(body.messages[0].content, /## 研究概览、## 研究问题、## 方法与数据/);
-  assert.match(body.messages[0].content, /2400 个 token/);
+  assert.match(body.messages[0].content, /2250 token/);
+  assert.match(body.messages[0].content, /每节约 281 token/);
 
   preferences["extensions.zotero-ai-note.sections.keywords"] = false;
   await plugin.requestSummary({
@@ -159,58 +160,44 @@ assert.match(html, /200,000/);
   assert.equal(plugin.getMaxOutputTokens(), 16000);
   preferences["extensions.zotero-ai-note.maxOutputTokens"] = 3000;
 
-  queuedResponses.push(
-    {
-      choices: [{ finish_reason: "length", message: { content: "## 研究概览\n过长的内容" } }],
-      usage: { prompt_tokens: 100, completion_tokens: 3000 }
-    },
-    {
-      choices: [{ finish_reason: "stop", message: { content: "## 研究概览\n简洁概览\n## 关键词\n术语" } }],
-      usage: { prompt_tokens: 110, completion_tokens: 80 }
-    }
-  );
-  const retryStart = requestHistory.length;
+  queuedResponses.push({
+    choices: [{ finish_reason: "stop", message: { content: "## 研究概览\n简洁概览\n## 关键词\n术语" } }],
+    usage: { prompt_tokens: 110, completion_tokens: 80 }
+  });
+  const focusedStart = requestHistory.length;
   const seenUsage = [];
-  let retryNotices = 0;
-  const retried = await plugin.requestSummary({
+  const focused = await plugin.requestSummary({
     item: { getField: () => "", getCreators: () => [] },
     text: "PDF text",
     truncated: false,
     originalLength: 8,
     provider: deepseek,
     sections: ["研究概览", "关键词"],
-    onRetry: () => retryNotices++,
     onUsage: (usage) => seenUsage.push(usage)
   });
-  assert.equal(requestHistory.length - retryStart, 2);
-  assert.equal(retryNotices, 1);
-  assert.equal(retried.summary, "## 研究概览\n简洁概览\n## 关键词\n术语");
-  assert.equal(retried.usage.input, 210);
-  assert.equal(retried.usage.output, 3080);
-  assert.equal(seenUsage.length, 2);
-  assert.match(JSON.parse(requestHistory[retryStart + 1].options.body).messages[0].content, /1800 个 token/);
-  assert.deepEqual(Array.from(plugin.missingSummarySections(retried.summary, ["研究概览", "关键词"])), []);
+  assert.equal(requestHistory.length - focusedStart, 1);
+  assert.equal(focused.summary, "## 研究概览\n简洁概览\n## 关键词\n术语");
+  assert.equal(focused.usage.input, 110);
+  assert.equal(focused.usage.output, 80);
+  assert.equal(seenUsage.length, 1);
+  assert.match(JSON.parse(requestHistory[focusedStart].options.body).messages[0].content, /每节约 1125 token/);
+  assert.deepEqual(Array.from(plugin.missingSummarySections(focused.summary, ["研究概览", "关键词"])), []);
   assert.deepEqual(Array.from(plugin.missingSummarySections("## 研究概览\n有内容", ["研究概览", "关键词"])), ["关键词"]);
 
-  queuedResponses.push(
-    { choices: [{ finish_reason: "stop", message: { content: "## 研究概览\n概览" } }] },
-    { choices: [{ finish_reason: "stop", message: { content: "## 研究概览\n概览\n## 关键词\n术语" } }] }
-  );
+  queuedResponses.push({ choices: [{ finish_reason: "stop", message: { content: "## 研究概览\n概览" } }] });
   const incompleteStart = requestHistory.length;
-  await plugin.requestSummary({
+  await assert.rejects(plugin.requestSummary({
     item: { getField: () => "", getCreators: () => [] },
     text: "PDF text",
     truncated: false,
     originalLength: 8,
     provider: deepseek,
     sections: ["研究概览", "关键词"]
-  });
-  assert.equal(requestHistory.length - incompleteStart, 2);
+  }), /缺少章节：关键词.*未保存不完整的笔记/);
+  assert.equal(requestHistory.length - incompleteStart, 1);
 
-  queuedResponses.push(
-    { choices: [{ finish_reason: "length", message: { content: "## 研究概览\n截断" } }] },
-    { choices: [{ finish_reason: "length", message: { content: "## 研究概览\n仍然截断" } }] }
-  );
+  queuedResponses.push({ choices: [{ finish_reason: "length", message: { content: "## 研究概览\n截断" } }] });
+  const truncatedStart = requestHistory.length;
   await assert.rejects(plugin.requestSummary({
     item: { getField: () => "", getCreators: () => [] },
     text: "PDF text",
@@ -219,6 +206,7 @@ assert.match(html, /200,000/);
     provider: deepseek,
     sections: ["研究概览", "关键词"]
   }), /未保存不完整的笔记/);
+  assert.equal(requestHistory.length - truncatedStart, 1);
 
   assert.ok(preferenceReads.length > 0);
   assert.ok(preferenceReads.every(({ global }) => global === true));
