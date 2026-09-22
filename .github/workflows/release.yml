@@ -24,8 +24,22 @@ jobs:
       - name: Build XPI
         run: ./scripts/build.sh
 
+      - name: Prepare release notes
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const version = JSON.parse(fs.readFileSync("manifest.json", "utf8")).version;
+          const sections = fs.readFileSync("CHANGELOG.md", "utf8").split(/^## /m);
+          const section = sections.find(text => text.startsWith(`${version} `));
+          if (!section) throw new Error(`CHANGELOG.md 缺少 ${version} 版本说明`);
+          const body = section.slice(section.indexOf("\n") + 1).trim();
+          if (!body) throw new Error(`CHANGELOG.md 的 ${version} 版本说明为空`);
+          fs.writeFileSync("release-notes.md", `# Zotero AI Note v${version}\n\n${body}\n`);
+          NODE
+
       - name: Publish GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: dist/*.xpi
-          generate_release_notes: true
+          body_path: release-notes.md

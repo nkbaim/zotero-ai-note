@@ -74,6 +74,7 @@ var ZoteroAINote = {
     progress.show();
 
     let completed = 0;
+    let incomplete = 0;
     const failures = [];
     const taskUsage = { input: 0, output: 0, reported: 0, missing: 0 };
     try {
@@ -83,7 +84,7 @@ var ZoteroAINote = {
         try {
           const { text, truncated, originalLength } = await this.extractPDFText(pdf);
           const articleUsage = { input: 0, output: 0 };
-          const { summary } = await this.requestSummary({
+          const { summary, warning } = await this.requestSummary({
             item,
             text,
             truncated,
@@ -107,8 +108,12 @@ var ZoteroAINote = {
               );
             }
           });
-          await this.createChildNote(item, summary, { truncated, originalLength, provider });
+          await this.createChildNote(item, summary, { truncated, originalLength, provider, warning });
           completed++;
+          if (warning) {
+            incomplete++;
+            progress.addDescription(`已保存部分笔记：${title}。请查看笔记底部提示。`);
+          }
         } catch (error) {
           Zotero.logError(error);
           failures.push(`${title}：${this.errorMessage(error)}`);
@@ -116,7 +121,7 @@ var ZoteroAINote = {
       }
     } finally {
       this.busy = false;
-      progress.addDescription(`完成：成功 ${completed} 篇，失败 ${failures.length} 篇。`);
+      progress.addDescription(`完成：已保存 ${completed} 篇（其中不完整 ${incomplete} 篇），失败 ${failures.length} 篇。`);
       if (taskUsage.reported) {
         const missing = taskUsage.missing ? `；另有 ${taskUsage.missing} 次请求未返回统计` : "";
         progress.addDescription(
@@ -267,15 +272,18 @@ var ZoteroAINote = {
     if (finishReason && finishReason !== "stop" && finishReason !== "length") {
       throw new Error(`${provider.label} API 未正常完成总结（finish_reason=${finishReason}）`);
     }
-    if (finishReason === "length") {
-      throw new Error(`模型返回 length，可能达到 ${maxOutputTokens} token 输出上限或上下文限制；未保存不完整的笔记。可在设置中提高输出上限。`);
+    if (!summary && finishReason !== "length") {
+      throw new Error(this.emptyResponseMessage(provider, data, "总结内容"));
     }
-    if (!summary) throw new Error(this.emptyResponseMessage(provider, data, "总结内容"));
     const missing = this.missingSummarySections(summary, selectedSections);
-    if (missing.length) {
-      throw new Error(`总结缺少章节：${missing.join("、")}；未保存不完整的笔记。可在设置中提高输出上限。`);
-    }
-    return { summary, usage };
+    const problems = [];
+    if (finishReason === "length") problems.push("模型输出可能已被截断");
+    if (missing.length) problems.push(`未完整覆盖所选章节：${missing.join("、")}`);
+    if (!summary) problems.push("本次未返回可用正文");
+    const warning = problems.length
+      ? `⚠️ 本次总结不完整：${problems.join("；")}。可在 Zotero AI Note 设置中减少“笔记内容”的勾选项，或提高“每篇笔记最多输出的 token 数”，然后重新生成。`
+      : null;
+    return { summary, usage, warning };
   },
 
   missingSummarySections(markdown, sections) {
@@ -394,16 +402,16 @@ var ZoteroAINote = {
     ].join("\n");
   },
 
-  async createChildNote(parent, markdown, { truncated, originalLength, provider }) {
+  async createChildNote(parent, markdown, { truncated, originalLength, provider, warning }) {
     const note = new Zotero.Item("note");
     note.libraryID = parent.libraryID;
     note.parentID = parent.id;
-    note.setNote(this.markdownToNoteHTML(markdown, { truncated, originalLength, provider }));
+    note.setNote(this.markdownToNoteHTML(markdown, { truncated, originalLength, provider, warning }));
     await note.saveTx();
     return note;
   },
 
-  markdownToNoteHTML(markdown, { truncated = false, originalLength = 0, provider = null } = {}) {
+  markdownToNoteHTML(markdown, { truncated = false, originalLength = 0, provider = null, warning = null } = {}) {
     const lines = String(markdown || "").replace(/\r\n?/g, "\n").split("\n");
     const html = ['<div data-schema-version="9">', "<h1>AI 文献总结</h1>"];
     let listType = null;
@@ -452,6 +460,7 @@ var ZoteroAINote = {
       ? `；PDF 原文约 ${Number(originalLength).toLocaleString()} 字符，本次输入经过截断`
       : "";
     html.push(`<p><em>由 ${generatedBy} 自动生成${limitation}。请对照原文核验关键信息。</em></p>`);
+    if (warning) html.push(`<p><strong>${this.escapeHTML(warning)}</strong></p>`);
     html.push("</div>");
     return html.join("\n");
   },

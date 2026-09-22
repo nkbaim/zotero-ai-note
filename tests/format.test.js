@@ -70,6 +70,14 @@ assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
 assert.doesNotMatch(html, /<script>/);
 assert.match(html, /<code>AUC<\/code>/);
 assert.match(html, /200,000/);
+const warnedHtml = plugin.markdownToNoteHTML("## 研究概览\n部分内容", {
+  warning: "⚠️ 内容被截断 <script>alert(1)</script>",
+  provider: { label: "DeepSeek", model: "deepseek-flash" }
+});
+assert.match(warnedHtml, /⚠️ 内容被截断 &lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+assert.ok(warnedHtml.indexOf("部分内容") < warnedHtml.indexOf("由 DeepSeek"));
+assert.ok(warnedHtml.indexOf("由 DeepSeek") < warnedHtml.indexOf("⚠️ 内容被截断"));
+assert.ok(warnedHtml.indexOf("⚠️ 内容被截断") < warnedHtml.indexOf("</div>"));
 
 (async () => {
   const deepseek = plugin.getProviderConfig();
@@ -84,6 +92,7 @@ assert.match(html, /200,000/);
     provider: deepseek
   });
   assert.equal(summaryResult.summary, completeSummary);
+  assert.equal(summaryResult.warning, null);
   assert.equal(summaryResult.usage.input, 120);
   assert.equal(summaryResult.usage.output, 30);
   assert.equal(lastRequest.method, "POST");
@@ -186,27 +195,54 @@ assert.match(html, /200,000/);
 
   queuedResponses.push({ choices: [{ finish_reason: "stop", message: { content: "## 研究概览\n概览" } }] });
   const incompleteStart = requestHistory.length;
-  await assert.rejects(plugin.requestSummary({
+  const incomplete = await plugin.requestSummary({
     item: { getField: () => "", getCreators: () => [] },
     text: "PDF text",
     truncated: false,
     originalLength: 8,
     provider: deepseek,
     sections: ["研究概览", "关键词"]
-  }), /缺少章节：关键词.*未保存不完整的笔记/);
+  });
+  assert.equal(incomplete.summary, "## 研究概览\n概览");
+  assert.match(incomplete.warning, /未完整覆盖所选章节：关键词/);
+  assert.match(incomplete.warning, /减少“笔记内容”的勾选项/);
   assert.equal(requestHistory.length - incompleteStart, 1);
 
   queuedResponses.push({ choices: [{ finish_reason: "length", message: { content: "## 研究概览\n截断" } }] });
   const truncatedStart = requestHistory.length;
-  await assert.rejects(plugin.requestSummary({
+  const truncated = await plugin.requestSummary({
     item: { getField: () => "", getCreators: () => [] },
     text: "PDF text",
     truncated: false,
     originalLength: 8,
     provider: deepseek,
     sections: ["研究概览", "关键词"]
-  }), /未保存不完整的笔记/);
+  });
+  assert.match(truncated.warning, /模型输出可能已被截断/);
+  assert.match(truncated.warning, /未完整覆盖所选章节：关键词/);
   assert.equal(requestHistory.length - truncatedStart, 1);
+
+  queuedResponses.push({ choices: [{ finish_reason: "length", message: { content: "" } }] });
+  const emptyLength = await plugin.requestSummary({
+    item: { getField: () => "", getCreators: () => [] },
+    text: "PDF text",
+    truncated: false,
+    originalLength: 8,
+    provider: deepseek,
+    sections: ["研究概览"]
+  });
+  assert.equal(emptyLength.summary, "");
+  assert.match(emptyLength.warning, /本次未返回可用正文/);
+
+  queuedResponses.push({ choices: [{ finish_reason: "stop", message: { content: "" } }] });
+  await assert.rejects(plugin.requestSummary({
+    item: { getField: () => "", getCreators: () => [] },
+    text: "PDF text",
+    truncated: false,
+    originalLength: 8,
+    provider: deepseek,
+    sections: ["研究概览"]
+  }), /未返回总结内容/);
 
   assert.ok(preferenceReads.length > 0);
   assert.ok(preferenceReads.every(({ global }) => global === true));

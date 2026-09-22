@@ -94,7 +94,7 @@
                 step="500"
                 preference="extensions.zotero-ai-note.maxOutputTokens"
                 style="width: 10em;"/>
-    <html:p>默认 3000。首次请求会要求模型留出篇幅余量并覆盖全部所选章节；不会自动重试。若仍被截断，不保存残缺笔记。</html:p>
+    <html:p>默认 3000。首次请求会要求模型留出篇幅余量并覆盖全部所选章节；不会自动重试。若仍被截断或缺少章节，会保存已有内容并在笔记底部提示；可调整章节或上限后重新生成。</html:p>
     <html:p>API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
   </groupbox>
 
