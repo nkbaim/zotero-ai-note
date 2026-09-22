@@ -3,9 +3,9 @@
     "zotero-ai-note@duyang.dev": {
       "updates": [
         {
-          "version": "0.2.6",
-          "update_link": "https://github.com/nkbaim/zotero-ai-note/releases/download/v0.2.6/zotero-ai-note-0.2.6.xpi",
-          "update_hash": "sha256:e12e0eb58ee7f33784221faa3780ce0351f8d610cf0ad9f1d7dbd0ca2cd7a94f",
+          "version": "0.2.7",
+          "update_link": "https://github.com/nkbaim/zotero-ai-note/releases/download/v0.2.7/zotero-ai-note-0.2.7.xpi",
+          "update_hash": "sha256:b6799360d2a233a67871e24409670a9f8da5d8eb0187468f79c0cb1f52b176e3",
           "applications": {
             "zotero": {
               "strict_min_version": "8.999",

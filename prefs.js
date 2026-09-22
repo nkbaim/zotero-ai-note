@@ -7,6 +7,7 @@ pref("extensions.zotero-ai-note.qwen.baseURL", "https://dashscope.aliyuncs.com/c
 pref("extensions.zotero-ai-note.qwen.model", "qwen-plus");
 pref("extensions.zotero-ai-note.language", "中文");
 pref("extensions.zotero-ai-note.maxChars", 120000);
+pref("extensions.zotero-ai-note.maxOutputTokens", 3000);
 pref("extensions.zotero-ai-note.sections.overview", true);
 pref("extensions.zotero-ai-note.sections.question", true);
 pref("extensions.zotero-ai-note.sections.methods", true);

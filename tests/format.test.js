@@ -12,6 +12,7 @@ const preferences = {
   "extensions.zotero-ai-note.qwen.model": "qwen-plus",
   "extensions.zotero-ai-note.language": "中文",
   "extensions.zotero-ai-note.maxChars": 10000,
+  "extensions.zotero-ai-note.maxOutputTokens": 3000,
   "extensions.zotero-ai-note.sections.overview": true,
   "extensions.zotero-ai-note.sections.question": true,
   "extensions.zotero-ai-note.sections.methods": true,
@@ -22,6 +23,10 @@ const preferences = {
   "extensions.zotero-ai-note.sections.keywords": true
 };
 let lastRequest;
+const requestHistory = [];
+const queuedResponses = [];
+const allSections = ["研究概览", "研究问题", "方法与数据", "主要发现", "创新与亮点", "局限性", "可复用的启示", "关键词"];
+const completeSummary = allSections.map((section) => `## ${section}\n内容`).join("\n\n");
 const preferenceReads = [];
 const sandbox = {
   rootURI: "file:///test/",
@@ -36,9 +41,13 @@ const sandbox = {
     HTTP: {
       request: async (method, url, options) => {
         lastRequest = { method, url, options };
+        requestHistory.push(lastRequest);
+        const body = JSON.parse(options.body);
         return {
-          responseText: JSON.stringify({
-            choices: [{ message: { content: "## 总结\n- 有效" } }],
+          responseText: JSON.stringify(queuedResponses.shift() || {
+            choices: [{ finish_reason: "stop", message: {
+              content: body.messages[0].content === "Reply with exactly: OK" ? "OK" : completeSummary
+            } }],
             usage: { prompt_tokens: 120, completion_tokens: 30, total_tokens: 150 }
           })
         };
@@ -74,7 +83,7 @@ assert.match(html, /200,000/);
     originalLength: 8,
     provider: deepseek
   });
-  assert.equal(summaryResult.summary, "## 总结\n- 有效");
+  assert.equal(summaryResult.summary, completeSummary);
   assert.equal(summaryResult.usage.input, 120);
   assert.equal(summaryResult.usage.output, 30);
   assert.equal(lastRequest.method, "POST");
@@ -82,9 +91,11 @@ assert.match(html, /200,000/);
   assert.equal(lastRequest.options.headers.Authorization, "Bearer deepseek-key");
   const body = JSON.parse(lastRequest.options.body);
   assert.equal(body.model, "deepseek-flash");
+  assert.equal(body.max_tokens, 3000);
   assert.deepEqual(body.thinking, { type: "disabled" });
   assert.match(body.messages[1].content, /PDF text/);
-  assert.match(body.messages[0].content, /研究概览、研究问题、方法与数据、主要发现、创新与亮点、局限性、可复用的启示、关键词/);
+  assert.match(body.messages[0].content, /## 研究概览、## 研究问题、## 方法与数据/);
+  assert.match(body.messages[0].content, /2400 个 token/);
 
   preferences["extensions.zotero-ai-note.sections.keywords"] = false;
   await plugin.requestSummary({
@@ -118,7 +129,7 @@ assert.match(html, /200,000/);
   assert.equal(qwenBody.thinking, undefined);
 
   const connectionReply = await plugin.testProviderConnection(qwen);
-  assert.equal(connectionReply, "## 总结\n- 有效");
+  assert.equal(connectionReply, "OK");
   const connectionBody = JSON.parse(lastRequest.options.body);
   assert.equal(connectionBody.max_tokens, 512);
   assert.equal(connectionBody.messages[0].content, "Reply with exactly: OK");
@@ -141,6 +152,73 @@ assert.match(html, /200,000/);
     choices: [{ finish_reason: "length", message: { content: null, reasoning_content: "thinking" } }],
     usage: { completion_tokens_details: { reasoning_tokens: 512 } }
   }, "文本内容"), /finish_reason=length.*推理 tokens=512.*仅返回了推理内容/);
+
+  preferences["extensions.zotero-ai-note.maxOutputTokens"] = 4500;
+  assert.equal(plugin.getMaxOutputTokens(), 4500);
+  preferences["extensions.zotero-ai-note.maxOutputTokens"] = 20000;
+  assert.equal(plugin.getMaxOutputTokens(), 16000);
+  preferences["extensions.zotero-ai-note.maxOutputTokens"] = 3000;
+
+  queuedResponses.push(
+    {
+      choices: [{ finish_reason: "length", message: { content: "## 研究概览\n过长的内容" } }],
+      usage: { prompt_tokens: 100, completion_tokens: 3000 }
+    },
+    {
+      choices: [{ finish_reason: "stop", message: { content: "## 研究概览\n简洁概览\n## 关键词\n术语" } }],
+      usage: { prompt_tokens: 110, completion_tokens: 80 }
+    }
+  );
+  const retryStart = requestHistory.length;
+  const seenUsage = [];
+  let retryNotices = 0;
+  const retried = await plugin.requestSummary({
+    item: { getField: () => "", getCreators: () => [] },
+    text: "PDF text",
+    truncated: false,
+    originalLength: 8,
+    provider: deepseek,
+    sections: ["研究概览", "关键词"],
+    onRetry: () => retryNotices++,
+    onUsage: (usage) => seenUsage.push(usage)
+  });
+  assert.equal(requestHistory.length - retryStart, 2);
+  assert.equal(retryNotices, 1);
+  assert.equal(retried.summary, "## 研究概览\n简洁概览\n## 关键词\n术语");
+  assert.equal(retried.usage.input, 210);
+  assert.equal(retried.usage.output, 3080);
+  assert.equal(seenUsage.length, 2);
+  assert.match(JSON.parse(requestHistory[retryStart + 1].options.body).messages[0].content, /1800 个 token/);
+  assert.deepEqual(Array.from(plugin.missingSummarySections(retried.summary, ["研究概览", "关键词"])), []);
+  assert.deepEqual(Array.from(plugin.missingSummarySections("## 研究概览\n有内容", ["研究概览", "关键词"])), ["关键词"]);
+
+  queuedResponses.push(
+    { choices: [{ finish_reason: "stop", message: { content: "## 研究概览\n概览" } }] },
+    { choices: [{ finish_reason: "stop", message: { content: "## 研究概览\n概览\n## 关键词\n术语" } }] }
+  );
+  const incompleteStart = requestHistory.length;
+  await plugin.requestSummary({
+    item: { getField: () => "", getCreators: () => [] },
+    text: "PDF text",
+    truncated: false,
+    originalLength: 8,
+    provider: deepseek,
+    sections: ["研究概览", "关键词"]
+  });
+  assert.equal(requestHistory.length - incompleteStart, 2);
+
+  queuedResponses.push(
+    { choices: [{ finish_reason: "length", message: { content: "## 研究概览\n截断" } }] },
+    { choices: [{ finish_reason: "length", message: { content: "## 研究概览\n仍然截断" } }] }
+  );
+  await assert.rejects(plugin.requestSummary({
+    item: { getField: () => "", getCreators: () => [] },
+    text: "PDF text",
+    truncated: false,
+    originalLength: 8,
+    provider: deepseek,
+    sections: ["研究概览", "关键词"]
+  }), /未保存不完整的笔记/);
 
   assert.ok(preferenceReads.length > 0);
   assert.ok(preferenceReads.every(({ global }) => global === true));

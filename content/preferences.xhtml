@@ -85,6 +85,16 @@
                 preference="extensions.zotero-ai-note.maxChars"
                 style="width: 10em;"/>
     <html:p>插件只发送提取出的文本。较长 PDF 会保留开头和结尾，并在笔记中标明内容已截断。</html:p>
+
+    <label value="每篇笔记最多输出的 token 数" control="zotero-ai-note-max-output-tokens"/>
+    <html:input id="zotero-ai-note-max-output-tokens"
+                type="number"
+                min="1000"
+                max="16000"
+                step="500"
+                preference="extensions.zotero-ai-note.maxOutputTokens"
+                style="width: 10em;"/>
+    <html:p>默认 3000。插件会要求模型在限额内覆盖全部所选章节；若响应被截断，会精简重试一次，可能增加 API 用量。</html:p>
     <html:p>API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
   </groupbox>
 

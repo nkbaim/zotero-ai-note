@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.7 — 2026-09-22
+
+- Add a per-paper output-token limit in settings (default 3000, range 1000–16000).
+- Ask models to distribute the output budget across all selected note sections.
+- Retry once with a shorter target when output is cut off or a selected section is missing.
+- Reject incomplete summaries instead of saving a truncated child note; count token usage for both attempts.
+
 ## 0.2.6 — 2026-09-20
 
 - Show input and output token usage after each paper finishes.
