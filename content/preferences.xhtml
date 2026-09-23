@@ -7,14 +7,14 @@
       padding: 4px 2px 18px;
     }
     .zotero-ai-note-card {
-      margin: 0 0 14px;
-      padding: 2px 4px 12px;
+      margin: 0 0 8px;
+      padding: 0 4px 12px;
       border: 1px solid var(--material-border, #d6d9df);
       border-radius: 10px;
       background: var(--material-background, rgba(128, 128, 128, 0.045));
     }
     .zotero-ai-note-card .zotero-ai-note-title {
-      margin: 5px 0 3px;
+      margin: 3px 0;
       color: var(--fill-primary, currentColor);
       font-size: 1.15em;
     }
@@ -85,6 +85,16 @@
       color: var(--fill-secondary, currentColor);
       font-size: 0.85em;
     }
+    .zotero-ai-note-provider-settings {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--material-border, #d6d9df);
+    }
+    .zotero-ai-note-provider-title {
+      margin: 0 0 6px;
+      font-size: 1em;
+      font-weight: 600;
+    }
     .zotero-ai-note-about p {
       margin: 3px 0;
       line-height: 1.35;
@@ -117,82 +127,82 @@
       </html:select>
     </html:div>
 
+    <vbox id="zotero-ai-note-deepseek-settings" class="zotero-ai-note-provider-settings">
+      <html:h3 class="zotero-ai-note-provider-title">DeepSeek API 设置</html:h3>
+
+      <hbox class="zotero-ai-note-field" align="center">
+        <label value="API Key" control="zotero-ai-note-deepseek-api-key"/>
+        <html:input id="zotero-ai-note-deepseek-api-key" class="zotero-ai-note-input zotero-ai-note-key"
+                    type="password" preference="extensions.zotero-ai-note.deepseek.apiKey" placeholder="sk-..."/>
+      </hbox>
+
+      <hbox class="zotero-ai-note-field" align="center">
+        <label value="API 地址" control="zotero-ai-note-deepseek-base-url"/>
+        <html:input id="zotero-ai-note-deepseek-base-url" class="zotero-ai-note-input zotero-ai-note-url"
+                    type="url" preference="extensions.zotero-ai-note.deepseek.baseURL"/>
+      </hbox>
+
+      <hbox class="zotero-ai-note-field" align="center">
+        <label value="模型" control="zotero-ai-note-deepseek-model"/>
+        <html:input id="zotero-ai-note-deepseek-model" class="zotero-ai-note-input zotero-ai-note-model"
+                    type="text" preference="extensions.zotero-ai-note.deepseek.model"/>
+      </hbox>
+      <html:p class="zotero-ai-note-security-note">API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
+    </vbox>
+
+    <vbox id="zotero-ai-note-qwen-settings" class="zotero-ai-note-provider-settings" hidden="true">
+      <html:h3 class="zotero-ai-note-provider-title">Qwen（阿里云百炼）API 设置</html:h3>
+
+      <hbox class="zotero-ai-note-field" align="center">
+        <label value="API Key" control="zotero-ai-note-qwen-api-key"/>
+        <html:input id="zotero-ai-note-qwen-api-key" class="zotero-ai-note-input zotero-ai-note-key"
+                    type="password" preference="extensions.zotero-ai-note.qwen.apiKey" placeholder="sk-..."/>
+      </hbox>
+
+      <hbox class="zotero-ai-note-field" align="center">
+        <label value="API 地址" control="zotero-ai-note-qwen-base-url"/>
+        <html:input id="zotero-ai-note-qwen-base-url" class="zotero-ai-note-input zotero-ai-note-url"
+                    type="url" preference="extensions.zotero-ai-note.qwen.baseURL"/>
+      </hbox>
+      <html:p>阿里云不同地域可能需要使用包含 Workspace ID 的专属地址，可直接在此修改。</html:p>
+
+      <hbox class="zotero-ai-note-field" align="center">
+        <label value="模型" control="zotero-ai-note-qwen-model"/>
+        <html:input id="zotero-ai-note-qwen-model" class="zotero-ai-note-input zotero-ai-note-model"
+                    type="text" preference="extensions.zotero-ai-note.qwen.model"/>
+      </hbox>
+      <html:p class="zotero-ai-note-security-note">API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
+    </vbox>
+
+    <vbox id="zotero-ai-note-zhipu-settings" class="zotero-ai-note-provider-settings" hidden="true">
+      <html:h3 class="zotero-ai-note-provider-title">智谱 GLM API 设置</html:h3>
+
+      <hbox class="zotero-ai-note-field" align="center">
+        <label value="API Key" control="zotero-ai-note-zhipu-api-key"/>
+        <html:input id="zotero-ai-note-zhipu-api-key" class="zotero-ai-note-input zotero-ai-note-key"
+                    type="password" preference="extensions.zotero-ai-note.zhipu.apiKey" placeholder="智谱 API Key"/>
+      </hbox>
+
+      <hbox class="zotero-ai-note-field" align="center">
+        <label value="API 地址" control="zotero-ai-note-zhipu-base-url"/>
+        <html:input id="zotero-ai-note-zhipu-base-url" class="zotero-ai-note-input zotero-ai-note-url"
+                    type="url" preference="extensions.zotero-ai-note.zhipu.baseURL"/>
+      </hbox>
+
+      <hbox class="zotero-ai-note-field" align="center">
+        <label value="模型" control="zotero-ai-note-zhipu-model"/>
+        <html:input id="zotero-ai-note-zhipu-model" class="zotero-ai-note-input zotero-ai-note-model"
+                    type="text" preference="extensions.zotero-ai-note.zhipu.model"/>
+      </hbox>
+      <html:p class="zotero-ai-note-security-note">API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
+    </vbox>
+
     <hbox class="zotero-ai-note-test-row" align="center">
       <button id="zotero-ai-note-test-connection"
               label="测试当前模型连接"
               oncommand="ZoteroAINotePreferences.testConnection();"/>
       <html:span id="zotero-ai-note-test-status" class="zotero-ai-note-test-status" role="status"></html:span>
     </hbox>
-  </groupbox>
-
-  <groupbox id="zotero-ai-note-deepseek-settings" class="zotero-ai-note-card">
-    <label><html:h2 class="zotero-ai-note-title">DeepSeek</html:h2></label>
-
-    <hbox class="zotero-ai-note-field" align="center">
-      <label value="API Key" control="zotero-ai-note-deepseek-api-key"/>
-      <html:input id="zotero-ai-note-deepseek-api-key" class="zotero-ai-note-input zotero-ai-note-key"
-                  type="password" preference="extensions.zotero-ai-note.deepseek.apiKey" placeholder="sk-..."/>
-    </hbox>
-
-    <hbox class="zotero-ai-note-field" align="center">
-      <label value="API 地址" control="zotero-ai-note-deepseek-base-url"/>
-      <html:input id="zotero-ai-note-deepseek-base-url" class="zotero-ai-note-input zotero-ai-note-url"
-                  type="url" preference="extensions.zotero-ai-note.deepseek.baseURL"/>
-    </hbox>
-
-    <hbox class="zotero-ai-note-field" align="center">
-      <label value="模型" control="zotero-ai-note-deepseek-model"/>
-      <html:input id="zotero-ai-note-deepseek-model" class="zotero-ai-note-input zotero-ai-note-model"
-                  type="text" preference="extensions.zotero-ai-note.deepseek.model"/>
-    </hbox>
-    <html:p class="zotero-ai-note-security-note">API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
-  </groupbox>
-
-  <groupbox id="zotero-ai-note-qwen-settings" class="zotero-ai-note-card" hidden="true">
-    <label><html:h2 class="zotero-ai-note-title">Qwen（阿里云百炼）</html:h2></label>
-
-    <hbox class="zotero-ai-note-field" align="center">
-      <label value="API Key" control="zotero-ai-note-qwen-api-key"/>
-      <html:input id="zotero-ai-note-qwen-api-key" class="zotero-ai-note-input zotero-ai-note-key"
-                  type="password" preference="extensions.zotero-ai-note.qwen.apiKey" placeholder="sk-..."/>
-    </hbox>
-
-    <hbox class="zotero-ai-note-field" align="center">
-      <label value="API 地址" control="zotero-ai-note-qwen-base-url"/>
-      <html:input id="zotero-ai-note-qwen-base-url" class="zotero-ai-note-input zotero-ai-note-url"
-                  type="url" preference="extensions.zotero-ai-note.qwen.baseURL"/>
-    </hbox>
-    <html:p>阿里云不同地域可能需要使用包含 Workspace ID 的专属地址，可直接在此修改。</html:p>
-
-    <hbox class="zotero-ai-note-field" align="center">
-      <label value="模型" control="zotero-ai-note-qwen-model"/>
-      <html:input id="zotero-ai-note-qwen-model" class="zotero-ai-note-input zotero-ai-note-model"
-                  type="text" preference="extensions.zotero-ai-note.qwen.model"/>
-    </hbox>
-    <html:p class="zotero-ai-note-security-note">API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
-  </groupbox>
-
-  <groupbox id="zotero-ai-note-zhipu-settings" class="zotero-ai-note-card" hidden="true">
-    <label><html:h2 class="zotero-ai-note-title">智谱 GLM</html:h2></label>
-
-    <hbox class="zotero-ai-note-field" align="center">
-      <label value="API Key" control="zotero-ai-note-zhipu-api-key"/>
-      <html:input id="zotero-ai-note-zhipu-api-key" class="zotero-ai-note-input zotero-ai-note-key"
-                  type="password" preference="extensions.zotero-ai-note.zhipu.apiKey" placeholder="智谱 API Key"/>
-    </hbox>
-
-    <hbox class="zotero-ai-note-field" align="center">
-      <label value="API 地址" control="zotero-ai-note-zhipu-base-url"/>
-      <html:input id="zotero-ai-note-zhipu-base-url" class="zotero-ai-note-input zotero-ai-note-url"
-                  type="url" preference="extensions.zotero-ai-note.zhipu.baseURL"/>
-    </hbox>
-
-    <hbox class="zotero-ai-note-field" align="center">
-      <label value="模型" control="zotero-ai-note-zhipu-model"/>
-      <html:input id="zotero-ai-note-zhipu-model" class="zotero-ai-note-input zotero-ai-note-model"
-                  type="text" preference="extensions.zotero-ai-note.zhipu.model"/>
-    </hbox>
-    <html:p class="zotero-ai-note-security-note">API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
   </groupbox>
 
   <groupbox class="zotero-ai-note-card">
@@ -245,7 +255,7 @@
 
   <groupbox class="zotero-ai-note-card zotero-ai-note-about">
     <label><html:h2 class="zotero-ai-note-title">关于</html:h2></label>
-    <html:p>版本：0.2.14</html:p>
+    <html:p>版本：0.2.15</html:p>
     <html:p>项目仓库：<html:a href="https://github.com/nkbaim/zotero-ai-note" target="_blank" onclick="ZoteroAINotePreferences.openExternalLink(event);">github.com/nkbaim/zotero-ai-note</html:a></html:p>
     <html:p>
       <html:a href="https://github.com/nkbaim/zotero-ai-note/releases" target="_blank" onclick="ZoteroAINotePreferences.openExternalLink(event);">版本发布</html:a>
