@@ -7,18 +7,14 @@
       padding: 4px 2px 18px;
     }
     .zotero-ai-note-card {
-      margin: 0 0 2px;
-      padding: 2px 4px 8px;
+      margin: 0 0 8px;
+      padding: 0 4px 12px;
       border: 1px solid var(--material-border, #d6d9df);
       border-radius: 10px;
       background: var(--material-background, rgba(128, 128, 128, 0.045));
     }
-    .zotero-ai-note-card > label {
-      margin: 0;
-      padding: 0;
-    }
     .zotero-ai-note-card .zotero-ai-note-title {
-      margin: 0 0 2px;
+      margin: 3px 0;
       color: var(--fill-primary, currentColor);
       font-size: 1.15em;
     }
@@ -128,6 +124,7 @@
         <html:option value="deepseek">DeepSeek</html:option>
         <html:option value="qwen">Qwen（通义千问）</html:option>
         <html:option value="zhipu">智谱 GLM</html:option>
+        <html:option value="mimo">MiMo（小米）</html:option>
       </html:select>
     </html:div>
 
@@ -201,6 +198,30 @@
       <html:p class="zotero-ai-note-security-note">API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
     </vbox>
 
+    <vbox id="zotero-ai-note-mimo-settings" class="zotero-ai-note-provider-settings" hidden="true">
+      <html:h3 class="zotero-ai-note-provider-title">MiMo（小米）API 设置</html:h3>
+
+      <hbox class="zotero-ai-note-field" align="center">
+        <label value="API Key" control="zotero-ai-note-mimo-api-key"/>
+        <html:input id="zotero-ai-note-mimo-api-key" class="zotero-ai-note-input zotero-ai-note-key"
+                    type="password" preference="extensions.zotero-ai-note.mimo.apiKey" placeholder="sk-..."/>
+      </hbox>
+
+      <hbox class="zotero-ai-note-field" align="center">
+        <label value="API 地址" control="zotero-ai-note-mimo-base-url"/>
+        <html:input id="zotero-ai-note-mimo-base-url" class="zotero-ai-note-input zotero-ai-note-url"
+                    type="url" preference="extensions.zotero-ai-note.mimo.baseURL"/>
+      </hbox>
+      <html:p>若使用 Token Plan，请填写套餐页面提供的专属 API 地址和 Key。</html:p>
+
+      <hbox class="zotero-ai-note-field" align="center">
+        <label value="模型" control="zotero-ai-note-mimo-model"/>
+        <html:input id="zotero-ai-note-mimo-model" class="zotero-ai-note-input zotero-ai-note-model"
+                    type="text" preference="extensions.zotero-ai-note.mimo.model"/>
+      </hbox>
+      <html:p class="zotero-ai-note-security-note">API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
+    </vbox>
+
     <hbox class="zotero-ai-note-test-row" align="center">
       <button id="zotero-ai-note-test-connection"
               label="测试当前模型连接"
@@ -259,7 +280,7 @@
 
   <groupbox class="zotero-ai-note-card zotero-ai-note-about">
     <label><html:h2 class="zotero-ai-note-title">关于</html:h2></label>
-    <html:p>版本：0.2.16</html:p>
+    <html:p>版本：0.2.17</html:p>
     <html:p>项目仓库：<html:a href="https://github.com/nkbaim/zotero-ai-note" target="_blank" onclick="ZoteroAINotePreferences.openExternalLink(event);">github.com/nkbaim/zotero-ai-note</html:a></html:p>
     <html:p>
       <html:a href="https://github.com/nkbaim/zotero-ai-note/releases" target="_blank" onclick="ZoteroAINotePreferences.openExternalLink(event);">版本发布</html:a>

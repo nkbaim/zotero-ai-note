@@ -2,13 +2,13 @@ window.ZoteroAINotePreferences = {
   init() {
     const provider = document.getElementById("zotero-ai-note-provider");
     const saved = Zotero.Prefs.get("extensions.zotero-ai-note.provider", true);
-    if (["deepseek", "qwen", "zhipu"].includes(saved)) provider.value = saved;
+    if (["deepseek", "qwen", "zhipu", "mimo"].includes(saved)) provider.value = saved;
     this.updateProviderVisibility();
   },
 
   updateProviderVisibility() {
     const selected = document.getElementById("zotero-ai-note-provider").value;
-    for (const providerID of ["deepseek", "qwen", "zhipu"]) {
+    for (const providerID of ["deepseek", "qwen", "zhipu", "mimo"]) {
       document.getElementById(`zotero-ai-note-${providerID}-settings`).hidden = providerID !== selected;
     }
     this.setStatus(document.getElementById("zotero-ai-note-test-status"), "", false);
@@ -26,7 +26,8 @@ window.ZoteroAINotePreferences = {
     const labels = {
       deepseek: "DeepSeek",
       qwen: "Qwen",
-      zhipu: "智谱 GLM"
+      zhipu: "智谱 GLM",
+      mimo: "MiMo（小米）"
     };
     const label = labels[providerID] || labels.deepseek;
     const savedConfig = Zotero.ZoteroAINote.getProviderConfig();

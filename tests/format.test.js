@@ -13,6 +13,9 @@ const preferences = {
   "extensions.zotero-ai-note.zhipu.apiKey": "zhipu-key",
   "extensions.zotero-ai-note.zhipu.baseURL": "https://open.bigmodel.cn/api/paas/v4",
   "extensions.zotero-ai-note.zhipu.model": "glm-4.7-flash",
+  "extensions.zotero-ai-note.mimo.apiKey": "mimo-key",
+  "extensions.zotero-ai-note.mimo.baseURL": "https://api.xiaomimimo.com/v1",
+  "extensions.zotero-ai-note.mimo.model": "mimo-v2.6-pro",
   "extensions.zotero-ai-note.language": "中文",
   "extensions.zotero-ai-note.maxChars": 10000,
   "extensions.zotero-ai-note.maxOutputTokens": 3000,
@@ -71,7 +74,7 @@ const plugin = sandbox.Zotero.ZoteroAINote;
 const preferenceElements = {
   "zotero-ai-note-provider": { value: "deepseek" },
   "zotero-ai-note-test-status": { textContent: "", style: {} },
-  ...Object.fromEntries(["deepseek", "qwen", "zhipu"].map((id) => [
+  ...Object.fromEntries(["deepseek", "qwen", "zhipu", "mimo"].map((id) => [
     `zotero-ai-note-${id}-settings`, { hidden: id !== "deepseek" }
   ]))
 };

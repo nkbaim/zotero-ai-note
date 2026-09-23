@@ -262,6 +262,7 @@ var ZoteroAINote = {
       max_tokens: maxOutputTokens,
       stream: false
     };
+    this.setProviderOutputLimit(body, provider);
     this.setThinkingMode(body, provider);
 
     const data = await this.sendChatRequest(provider, body, 180000);
@@ -313,6 +314,7 @@ var ZoteroAINote = {
       max_tokens: 512,
       stream: false
     };
+    this.setProviderOutputLimit(body, provider);
     this.setThinkingMode(body, provider);
 
     const data = await this.sendChatRequest(provider, body, 30000);
@@ -325,8 +327,15 @@ var ZoteroAINote = {
     if (provider.id === "zhipu" && /^glm-5\.3(?:-|$)/i.test(provider.model)) {
       body.thinking = { type: "enabled" };
       body.reasoning_effort = "low";
-    } else if (["deepseek", "zhipu"].includes(provider.id)) {
+    } else if (["deepseek", "zhipu", "mimo"].includes(provider.id)) {
       body.thinking = { type: "disabled" };
+    }
+  },
+
+  setProviderOutputLimit(body, provider) {
+    if (provider.id === "mimo") {
+      body.max_completion_tokens = body.max_tokens;
+      delete body.max_tokens;
     }
   },
 
@@ -377,7 +386,9 @@ var ZoteroAINote = {
       response = await Zotero.HTTP.request("POST", endpoint, {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${provider.apiKey}`
+          ...(provider.id === "mimo"
+            ? { "api-key": provider.apiKey }
+            : { "Authorization": `Bearer ${provider.apiKey}` })
         },
         body: JSON.stringify(body),
         responseType: "json",
@@ -496,7 +507,7 @@ var ZoteroAINote = {
 
   getProviderConfig() {
     const configuredProvider = Zotero.Prefs.get("extensions.zotero-ai-note.provider", true);
-    const providerID = ["deepseek", "qwen", "zhipu"].includes(configuredProvider)
+    const providerID = ["deepseek", "qwen", "zhipu", "mimo"].includes(configuredProvider)
       ? configuredProvider
       : "deepseek";
     const defaults = {
@@ -517,6 +528,12 @@ var ZoteroAINote = {
         envKey: "ZHIPU_API_KEY",
         baseURL: "https://open.bigmodel.cn/api/paas/v4",
         model: "glm-4.7-flash"
+      },
+      mimo: {
+        label: "MiMo（小米）",
+        envKey: "MIMO_API_KEY",
+        baseURL: "https://api.xiaomimimo.com/v1",
+        model: "mimo-v2.6-pro"
       }
     }[providerID];
     const prefix = `extensions.zotero-ai-note.${providerID}`;

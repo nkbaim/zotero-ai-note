@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.17 — 2026-09-23
+
+### 本次更新
+
+- 将设置页卡片间距、内边距和标题留白恢复为 v0.2.15 的布局数值。
+- 新增 Xiaomi MiMo API 服务，支持单独配置 API Key、API 地址和模型，并使用官方 `api-key` 认证头及 `max_completion_tokens` 输出上限参数。
+- MiMo 默认 API 地址为 `https://api.xiaomimimo.com/v1`，默认模型为 `mimo-v2.6-pro`，支持 `MIMO_API_KEY` 环境变量；Token Plan 用户可填写套餐专属地址和 Key。
+
 ## 0.2.16 — 2026-09-23
 
 ### 本次更新

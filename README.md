@@ -5,7 +5,7 @@
 <h1 align="center">Zotero AI Note</h1>
 
 <p align="center">
-  使用 Qwen、DeepSeek 或智谱 GLM 阅读 Zotero 中所选文献的 PDF，并自动生成结构化子笔记。
+  使用 Qwen、DeepSeek、智谱 GLM 或小米 MiMo 阅读 Zotero 中所选文献的 PDF，并自动生成结构化子笔记。
 </p>
 
 <p align="center">
@@ -25,7 +25,7 @@
 - 在 Zotero 文献列表中一次选择一篇或多篇文献进行总结
 - 支持直接选择文献下的 PDF 附件
 - 使用 Zotero 内置 PDF 文本提取能力，不上传 PDF 文件本身
-- 支持 DeepSeek、Qwen（阿里云百炼）和智谱 GLM 三种 API 服务
+- 支持 DeepSeek、Qwen（阿里云百炼）、智谱 GLM 和 Xiaomi MiMo 四种 API 服务
 - 三个服务分别保存 API Key、API 地址和模型名；设置页仅显示当前所选服务的配置，切换时无需重复填写
 - 设置页可发送一个极短请求，验证当前 API Key、地址和模型是否可用
 - 自动生成研究概览、研究问题、方法与数据、主要发现、创新亮点、局限性、启示和关键词
@@ -95,9 +95,21 @@
 
 如使用 `glm-5.3`，插件会按[智谱官方要求](https://docs.z.ai/guides/llm/glm-5.3)开启思考模式，并设为 `low` 思考强度；该模型不支持关闭思考。思考 token 也可能占用输出额度。如果连接测试仍报错，请核对账户可用模型、API Key 类型及对应的 API 地址；Z.ai 平台与智谱国内平台的地址可能不同。
 
+### Xiaomi MiMo（小米）
+
+默认配置：
+
+| 设置 | 默认值 |
+|---|---|
+| API 地址 | `https://api.xiaomimimo.com/v1` |
+| 模型 | `mimo-v2.6-pro` |
+| 环境变量 | `MIMO_API_KEY` |
+
+在 [Xiaomi MiMo API 开放平台](https://mimo.mi.com/)创建 API Key 后填入设置页。插件使用 OpenAI Chat Completions 兼容接口，并通过 `api-key` 请求头发送 API Key。使用 Token Plan 时，将 API 地址和 Key 改为套餐页面提供的专属凭据。
+
 ### 验证连接
 
-1. 选择 DeepSeek、Qwen 或智谱 GLM。
+1. 选择 DeepSeek、Qwen、智谱 GLM 或 Xiaomi MiMo。
 2. 填写对应的 API Key、API 地址和模型名。
 3. 点击“测试当前模型连接”。
 
