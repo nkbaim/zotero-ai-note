@@ -1,4 +1,19 @@
 window.ZoteroAINotePreferences = {
+  init() {
+    const provider = document.getElementById("zotero-ai-note-provider");
+    const saved = Zotero.Prefs.get("extensions.zotero-ai-note.provider", true);
+    if (["deepseek", "qwen", "zhipu"].includes(saved)) provider.value = saved;
+    this.updateProviderVisibility();
+  },
+
+  updateProviderVisibility() {
+    const selected = document.getElementById("zotero-ai-note-provider").value;
+    for (const providerID of ["deepseek", "qwen", "zhipu"]) {
+      document.getElementById(`zotero-ai-note-${providerID}-settings`).hidden = providerID !== selected;
+    }
+    this.setStatus(document.getElementById("zotero-ai-note-test-status"), "", false);
+  },
+
   async testConnection() {
     const button = document.getElementById("zotero-ai-note-test-connection");
     const status = document.getElementById("zotero-ai-note-test-status");

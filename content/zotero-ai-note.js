@@ -262,7 +262,7 @@ var ZoteroAINote = {
       max_tokens: maxOutputTokens,
       stream: false
     };
-    if (["deepseek", "zhipu"].includes(provider.id)) body.thinking = { type: "disabled" };
+    this.setThinkingMode(body, provider);
 
     const data = await this.sendChatRequest(provider, body, 180000);
     const usage = this.getTokenUsage(data);
@@ -313,12 +313,21 @@ var ZoteroAINote = {
       max_tokens: 512,
       stream: false
     };
-    if (["deepseek", "zhipu"].includes(provider.id)) body.thinking = { type: "disabled" };
+    this.setThinkingMode(body, provider);
 
     const data = await this.sendChatRequest(provider, body, 30000);
     const reply = this.extractAssistantText(data);
     if (!reply) throw new Error(this.emptyResponseMessage(provider, data, "文本内容"));
     return reply;
+  },
+
+  setThinkingMode(body, provider) {
+    if (provider.id === "zhipu" && /^glm-5\.3(?:-|$)/i.test(provider.model)) {
+      body.thinking = { type: "enabled" };
+      body.reasoning_effort = "low";
+    } else if (["deepseek", "zhipu"].includes(provider.id)) {
+      body.thinking = { type: "disabled" };
+    }
   },
 
   extractAssistantText(data) {
@@ -376,11 +385,14 @@ var ZoteroAINote = {
       });
     } catch (error) {
       const status = error?.xmlhttp?.status || error?.status;
-      const detail = error?.xmlhttp?.responseText || error?.message || String(error);
+      const response = error?.xmlhttp?.response;
+      const detail = (typeof response === "string" ? response : response?.error?.message || response?.message || response?.msg)
+        || error?.message || String(error);
       throw new Error(`${provider.label} API 请求失败${status ? `（HTTP ${status}）` : ""}：${detail}`);
     }
 
-    const rawResponse = response.response ?? response.responseText;
+    const rawResponse = response.response;
+    if (rawResponse == null) throw new Error(`${provider.label} API 返回空响应`);
     const data = typeof rawResponse === "string"
       ? JSON.parse(rawResponse)
       : rawResponse;

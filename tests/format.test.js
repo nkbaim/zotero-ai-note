@@ -53,12 +53,12 @@ const sandbox = {
         requestHistory.push(lastRequest);
         const body = JSON.parse(options.body);
         return {
-          responseText: JSON.stringify(queuedResponses.shift() || {
+          response: queuedResponses.shift() || {
             choices: [{ finish_reason: "stop", message: {
               content: body.messages[0].content === "Reply with exactly: OK" ? "OK" : completeSummary
             } }],
             usage: { prompt_tokens: 120, completion_tokens: 30, total_tokens: 150 }
-          })
+          }
         };
       }
     }
@@ -68,6 +68,31 @@ vm.createContext(sandbox);
 vm.runInContext(fs.readFileSync("content/zotero-ai-note.js", "utf8"), sandbox);
 
 const plugin = sandbox.Zotero.ZoteroAINote;
+const preferenceElements = {
+  "zotero-ai-note-provider": { value: "deepseek" },
+  "zotero-ai-note-test-status": { textContent: "", style: {} },
+  ...Object.fromEntries(["deepseek", "qwen", "zhipu"].map((id) => [
+    `zotero-ai-note-${id}-settings`, { hidden: id !== "deepseek" }
+  ]))
+};
+const preferenceSandbox = {
+  window: {},
+  document: { getElementById: (id) => preferenceElements[id] },
+  Zotero: sandbox.Zotero
+};
+vm.createContext(preferenceSandbox);
+vm.runInContext(fs.readFileSync("content/preferences.js", "utf8"), preferenceSandbox);
+const preferenceUI = preferenceSandbox.window.ZoteroAINotePreferences;
+preferences["extensions.zotero-ai-note.provider"] = "qwen";
+preferenceUI.init();
+assert.equal(preferenceElements["zotero-ai-note-provider"].value, "qwen");
+assert.equal(preferenceElements["zotero-ai-note-qwen-settings"].hidden, false);
+assert.equal(preferenceElements["zotero-ai-note-deepseek-settings"].hidden, true);
+preferenceElements["zotero-ai-note-provider"].value = "zhipu";
+preferenceUI.updateProviderVisibility();
+assert.equal(preferenceElements["zotero-ai-note-zhipu-settings"].hidden, false);
+assert.equal(preferenceElements["zotero-ai-note-qwen-settings"].hidden, true);
+preferences["extensions.zotero-ai-note.provider"] = "deepseek";
 const html = plugin.markdownToNoteHTML(
   "## 主要发现\n- **有效** <script>alert(1)</script>\n1. `AUC` 为 0.91",
   { truncated: true, originalLength: 200000, generatedAt: new Date("2026-09-22T09:30:00+08:00") }
@@ -196,6 +221,36 @@ assert.ok(warnedHtml.indexOf("⚠️ 内容被截断") < warnedHtml.indexOf("</d
   const zhipuConnectionBody = JSON.parse(lastRequest.options.body);
   assert.equal(zhipuConnectionBody.model, "glm-4.7-flash");
   assert.deepEqual(zhipuConnectionBody.thinking, { type: "disabled" });
+  const glm53 = { ...zhipu, model: "glm-5.3" };
+  await plugin.testProviderConnection(glm53);
+  const glm53ConnectionBody = JSON.parse(lastRequest.options.body);
+  assert.deepEqual(glm53ConnectionBody.thinking, { type: "enabled" });
+  assert.equal(glm53ConnectionBody.reasoning_effort, "low");
+  await plugin.requestSummary({
+    item: { getField: () => "", getCreators: () => [] },
+    text: "GLM-5.3 PDF text",
+    truncated: false,
+    originalLength: 16,
+    provider: glm53
+  });
+  const glm53SummaryBody = JSON.parse(lastRequest.options.body);
+  assert.deepEqual(glm53SummaryBody.thinking, { type: "enabled" });
+  assert.equal(glm53SummaryBody.reasoning_effort, "low");
+  const request = sandbox.Zotero.HTTP.request;
+  sandbox.Zotero.HTTP.request = async () => {
+    const xmlhttp = {
+      status: 400,
+      response: { error: { message: "model not available" } },
+      get responseText() { throw new Error("responseText getter should not be read"); }
+    };
+    throw { xmlhttp, message: "HTTP 400" };
+  };
+  try {
+    await assert.rejects(plugin.testProviderConnection(glm53),
+      /智谱 GLM API 请求失败（HTTP 400）：model not available/);
+  } finally {
+    sandbox.Zotero.HTTP.request = request;
+  }
   assert.equal(plugin.extractAssistantText({
     choices: [{ message: { content: [{ type: "text", text: " OK " }] } }]
   }), "OK");
