@@ -34,8 +34,19 @@
       margin-right: 10px;
     }
     .zotero-ai-note-provider-select {
+      width: auto;
       min-width: 15em;
+      max-width: 100%;
       padding: 5px 8px;
+      border-radius: 6px;
+    }
+    .zotero-ai-note-select {
+      width: auto;
+      min-width: 10em;
+      max-width: 100%;
+      margin: 4px 0 12px;
+      padding: 5px 8px;
+      border: 1px solid var(--material-border, #c8ccd2);
       border-radius: 6px;
     }
     .zotero-ai-note-field {
@@ -68,6 +79,11 @@
     }
     .zotero-ai-note-test-status {
       margin-left: 8px;
+    }
+    .zotero-ai-note-security-note {
+      margin: 12px 8px 0;
+      color: var(--fill-secondary, currentColor);
+      font-size: 0.85em;
     }
     .zotero-ai-note-section-grid {
       display: grid;
@@ -125,6 +141,7 @@
       <html:input id="zotero-ai-note-deepseek-model" class="zotero-ai-note-input zotero-ai-note-model"
                   type="text" preference="extensions.zotero-ai-note.deepseek.model"/>
     </hbox>
+    <html:p class="zotero-ai-note-security-note">API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
   </groupbox>
 
   <groupbox id="zotero-ai-note-qwen-settings" class="zotero-ai-note-card" hidden="true">
@@ -148,6 +165,7 @@
       <html:input id="zotero-ai-note-qwen-model" class="zotero-ai-note-input zotero-ai-note-model"
                   type="text" preference="extensions.zotero-ai-note.qwen.model"/>
     </hbox>
+    <html:p class="zotero-ai-note-security-note">API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
   </groupbox>
 
   <groupbox id="zotero-ai-note-zhipu-settings" class="zotero-ai-note-card" hidden="true">
@@ -170,13 +188,14 @@
       <html:input id="zotero-ai-note-zhipu-model" class="zotero-ai-note-input zotero-ai-note-model"
                   type="text" preference="extensions.zotero-ai-note.zhipu.model"/>
     </hbox>
+    <html:p class="zotero-ai-note-security-note">API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
   </groupbox>
 
   <groupbox class="zotero-ai-note-card">
     <label><html:h2 class="zotero-ai-note-title">总结设置</html:h2></label>
 
     <label value="输出语言" control="zotero-ai-note-language"/>
-    <html:select id="zotero-ai-note-language"
+    <html:select id="zotero-ai-note-language" class="zotero-ai-note-select"
                  preference="extensions.zotero-ai-note.language">
       <html:option value="中文">中文</html:option>
       <html:option value="English">English</html:option>
@@ -201,7 +220,6 @@
                 preference="extensions.zotero-ai-note.maxOutputTokens"
                 style="width: 10em;"/>
     <html:p>默认 3000。首次请求会要求模型留出篇幅余量并覆盖全部所选章节；不会自动重试。若仍被截断或缺少章节，会保存已有内容并在笔记底部提示；可调整章节或上限后重新生成。</html:p>
-    <html:p>API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
   </groupbox>
 
   <groupbox class="zotero-ai-note-card">
@@ -219,5 +237,16 @@
       <html:label><html:input type="checkbox" preference="extensions.zotero-ai-note.sections.keywords"/> 关键词</html:label>
     </html:div>
     <html:p>开始总结时至少需要选择一项。</html:p>
+  </groupbox>
+
+  <groupbox class="zotero-ai-note-card">
+    <label><html:h2 class="zotero-ai-note-title">关于</html:h2></label>
+    <html:p>版本：0.2.13</html:p>
+    <html:p>项目仓库：<html:a href="https://github.com/nkbaim/zotero-ai-note" target="_blank">github.com/nkbaim/zotero-ai-note</html:a></html:p>
+    <html:p>
+      <html:a href="https://github.com/nkbaim/zotero-ai-note/releases" target="_blank">版本发布</html:a>
+      · <html:a href="https://github.com/nkbaim/zotero-ai-note/issues" target="_blank">问题反馈</html:a>
+      · <html:a href="https://github.com/nkbaim/zotero-ai-note/blob/main/LICENSE" target="_blank">MIT License</html:a>
+    </html:p>
   </groupbox>
 </vbox>
