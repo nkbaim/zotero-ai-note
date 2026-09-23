@@ -2,10 +2,13 @@ window.ZoteroAINotePreferences = {
   async testConnection() {
     const button = document.getElementById("zotero-ai-note-test-connection");
     const status = document.getElementById("zotero-ai-note-test-status");
-    const providerID = document.getElementById("zotero-ai-note-provider").value === "qwen"
-      ? "qwen"
-      : "deepseek";
-    const label = providerID === "qwen" ? "Qwen" : "DeepSeek";
+    const providerID = document.getElementById("zotero-ai-note-provider").value;
+    const labels = {
+      deepseek: "DeepSeek",
+      qwen: "Qwen",
+      zhipu: "智谱 GLM"
+    };
+    const label = labels[providerID] || labels.deepseek;
     const savedConfig = Zotero.ZoteroAINote.getProviderConfig();
     const apiKey = document.getElementById(`zotero-ai-note-${providerID}-api-key`).value.trim()
       || (savedConfig.id === providerID ? savedConfig.apiKey : "");

@@ -5,7 +5,7 @@
 <h1 align="center">Zotero AI Note</h1>
 
 <p align="center">
-  使用 Qwen 或 DeepSeek 阅读 Zotero 中所选文献的 PDF，并自动生成结构化子笔记。
+  使用 Qwen、DeepSeek 或智谱 GLM 阅读 Zotero 中所选文献的 PDF，并自动生成结构化子笔记。
 </p>
 
 <p align="center">
@@ -25,7 +25,7 @@
 - 在 Zotero 文献列表中一次选择一篇或多篇文献进行总结
 - 支持直接选择文献下的 PDF 附件
 - 使用 Zotero 内置 PDF 文本提取能力，不上传 PDF 文件本身
-- 支持 DeepSeek 和 Qwen（阿里云百炼）两种 API 服务
+- 支持 DeepSeek、Qwen（阿里云百炼）和智谱 GLM 三种 API 服务
 - 两个服务分别保存 API Key、API 地址和模型名，切换时无需重复填写
 - 设置页可发送一个极短请求，验证当前 API Key、地址和模型是否可用
 - 自动生成研究概览、研究问题、方法与数据、主要发现、创新亮点、局限性、启示和关键词
@@ -79,9 +79,21 @@
 
 阿里云百炼不同地域或业务空间可能要求使用包含 Workspace ID 的专属 API 地址。请按照百炼控制台给出的 OpenAI 兼容地址修改设置。环境变量 `DASHSCOPE_API_KEY` 同样优先于设置页中的值。
 
+### 智谱 GLM
+
+默认配置：
+
+| 设置 | 默认值 |
+|---|---|
+| API 地址 | `https://open.bigmodel.cn/api/paas/v4` |
+| 模型 | `glm-4.7-flash`（GLM-4.7-Flash） |
+| 环境变量 | `ZHIPU_API_KEY` |
+
+在智谱开放平台创建 API Key 后填入设置页。也可以在启动 Zotero 前设置 `ZHIPU_API_KEY`；环境变量优先于设置页中的值。智谱官方的 OpenAI 兼容接口使用 `/chat/completions`，插件会自动补全该路径。为避免思考过程占用笔记输出上限，插件默认关闭智谱的思考模式。
+
 ### 验证连接
 
-1. 选择 DeepSeek 或 Qwen。
+1. 选择 DeepSeek、Qwen 或智谱 GLM。
 2. 填写对应的 API Key、API 地址和模型名。
 3. 点击“测试当前模型连接”。
 

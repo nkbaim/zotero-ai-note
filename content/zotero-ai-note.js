@@ -262,7 +262,7 @@ var ZoteroAINote = {
       max_tokens: maxOutputTokens,
       stream: false
     };
-    if (provider.id === "deepseek") body.thinking = { type: "disabled" };
+    if (["deepseek", "zhipu"].includes(provider.id)) body.thinking = { type: "disabled" };
 
     const data = await this.sendChatRequest(provider, body, 180000);
     const usage = this.getTokenUsage(data);
@@ -313,7 +313,7 @@ var ZoteroAINote = {
       max_tokens: 512,
       stream: false
     };
-    if (provider.id === "deepseek") body.thinking = { type: "disabled" };
+    if (["deepseek", "zhipu"].includes(provider.id)) body.thinking = { type: "disabled" };
 
     const data = await this.sendChatRequest(provider, body, 30000);
     const reply = this.extractAssistantText(data);
@@ -483,22 +483,30 @@ var ZoteroAINote = {
   },
 
   getProviderConfig() {
-    const providerID = Zotero.Prefs.get("extensions.zotero-ai-note.provider", true) === "qwen"
-      ? "qwen"
+    const configuredProvider = Zotero.Prefs.get("extensions.zotero-ai-note.provider", true);
+    const providerID = ["deepseek", "qwen", "zhipu"].includes(configuredProvider)
+      ? configuredProvider
       : "deepseek";
-    const defaults = providerID === "qwen"
-      ? {
-          label: "Qwen",
-          envKey: "DASHSCOPE_API_KEY",
-          baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
-          model: "qwen-plus"
-        }
-      : {
-          label: "DeepSeek",
-          envKey: "DEEPSEEK_API_KEY",
-          baseURL: "https://api.deepseek.com",
-          model: "deepseek-flash"
-        };
+    const defaults = {
+      deepseek: {
+        label: "DeepSeek",
+        envKey: "DEEPSEEK_API_KEY",
+        baseURL: "https://api.deepseek.com",
+        model: "deepseek-flash"
+      },
+      qwen: {
+        label: "Qwen",
+        envKey: "DASHSCOPE_API_KEY",
+        baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        model: "qwen-plus"
+      },
+      zhipu: {
+        label: "智谱 GLM",
+        envKey: "ZHIPU_API_KEY",
+        baseURL: "https://open.bigmodel.cn/api/paas/v4",
+        model: "glm-4.7-flash"
+      }
+    }[providerID];
     const prefix = `extensions.zotero-ai-note.${providerID}`;
     const environmentKey = Services.env?.get?.(defaults.envKey) || "";
     return {

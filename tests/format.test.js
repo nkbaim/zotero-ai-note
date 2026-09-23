@@ -10,6 +10,9 @@ const preferences = {
   "extensions.zotero-ai-note.qwen.apiKey": "qwen-key",
   "extensions.zotero-ai-note.qwen.baseURL": "https://dashscope.aliyuncs.com/compatible-mode/v1",
   "extensions.zotero-ai-note.qwen.model": "qwen-plus",
+  "extensions.zotero-ai-note.zhipu.apiKey": "zhipu-key",
+  "extensions.zotero-ai-note.zhipu.baseURL": "https://open.bigmodel.cn/api/paas/v4",
+  "extensions.zotero-ai-note.zhipu.model": "glm-4.7-flash",
   "extensions.zotero-ai-note.language": "中文",
   "extensions.zotero-ai-note.maxChars": 10000,
   "extensions.zotero-ai-note.maxOutputTokens": 3000,
@@ -157,6 +160,27 @@ assert.ok(warnedHtml.indexOf("⚠️ 内容被截断") < warnedHtml.indexOf("</d
   assert.equal(qwenBody.model, "qwen-plus");
   assert.equal(qwenBody.thinking, undefined);
 
+  preferences["extensions.zotero-ai-note.provider"] = "zhipu";
+  const zhipu = plugin.getProviderConfig();
+  assert.equal(zhipu.label, "智谱 GLM");
+  assert.equal(zhipu.model, "glm-4.7-flash");
+  assert.equal(zhipu.baseURL, "https://open.bigmodel.cn/api/paas/v4");
+  await plugin.requestSummary({
+    item: {
+      getField: () => "",
+      getCreators: () => []
+    },
+    text: "Zhipu PDF text",
+    truncated: false,
+    originalLength: 15,
+    provider: zhipu
+  });
+  assert.equal(lastRequest.url, "https://open.bigmodel.cn/api/paas/v4/chat/completions");
+  assert.equal(lastRequest.options.headers.Authorization, "Bearer zhipu-key");
+  const zhipuBody = JSON.parse(lastRequest.options.body);
+  assert.equal(zhipuBody.model, "glm-4.7-flash");
+  assert.deepEqual(zhipuBody.thinking, { type: "disabled" });
+
   const connectionReply = await plugin.testProviderConnection(qwen);
   assert.equal(connectionReply, "OK");
   const connectionBody = JSON.parse(lastRequest.options.body);
@@ -168,6 +192,10 @@ assert.ok(warnedHtml.indexOf("⚠️ 内容被截断") < warnedHtml.indexOf("</d
   await plugin.testProviderConnection(deepseek);
   const deepseekConnectionBody = JSON.parse(lastRequest.options.body);
   assert.deepEqual(deepseekConnectionBody.thinking, { type: "disabled" });
+  await plugin.testProviderConnection(zhipu);
+  const zhipuConnectionBody = JSON.parse(lastRequest.options.body);
+  assert.equal(zhipuConnectionBody.model, "glm-4.7-flash");
+  assert.deepEqual(zhipuConnectionBody.thinking, { type: "disabled" });
   assert.equal(plugin.extractAssistantText({
     choices: [{ message: { content: [{ type: "text", text: " OK " }] } }]
   }), "OK");

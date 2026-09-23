@@ -1,73 +1,178 @@
-<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+<vbox class="zotero-ai-note-settings"
+      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
       xmlns:html="http://www.w3.org/1999/xhtml">
-  <groupbox>
-    <label><html:h2>AI 模型</html:h2></label>
-    <html:p>选择用于分析 PDF 的 AI 服务。每个服务使用独立的 API Key、API 地址和模型名。</html:p>
+  <html:style><![CDATA[
+    .zotero-ai-note-settings {
+      padding: 4px 2px 18px;
+    }
+    .zotero-ai-note-card {
+      margin: 0 0 14px;
+      padding: 2px 4px 12px;
+      border: 1px solid var(--material-border, #d6d9df);
+      border-radius: 10px;
+      background: var(--material-background, rgba(128, 128, 128, 0.045));
+    }
+    .zotero-ai-note-card .zotero-ai-note-title {
+      margin: 5px 0 3px;
+      color: var(--fill-primary, currentColor);
+      font-size: 1.15em;
+    }
+    .zotero-ai-note-lead {
+      margin: 2px 0 12px;
+      color: var(--fill-secondary, currentColor);
+    }
+    .zotero-ai-note-selector {
+      margin: 4px 0 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--material-border, #d6d9df);
+      border-radius: 8px;
+      background: var(--material-background20, rgba(128, 128, 128, 0.08));
+    }
+    .zotero-ai-note-selector label {
+      font-weight: 600;
+      margin-right: 10px;
+    }
+    .zotero-ai-note-provider-select {
+      min-width: 15em;
+      padding: 5px 8px;
+      border-radius: 6px;
+    }
+    .zotero-ai-note-field {
+      margin: 7px 0;
+    }
+    .zotero-ai-note-field label {
+      min-width: 6em;
+      color: var(--fill-secondary, currentColor);
+    }
+    .zotero-ai-note-field .zotero-ai-note-input {
+      box-sizing: border-box;
+      min-height: 26px;
+      padding: 4px 8px;
+      border: 1px solid var(--material-border, #c8ccd2);
+      border-radius: 6px;
+    }
+    .zotero-ai-note-field .zotero-ai-note-key {
+      width: 32em;
+    }
+    .zotero-ai-note-field .zotero-ai-note-url {
+      width: 38em;
+    }
+    .zotero-ai-note-field .zotero-ai-note-model {
+      width: 24em;
+    }
+    .zotero-ai-note-test-row {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--material-border, #d6d9df);
+    }
+    .zotero-ai-note-test-status {
+      margin-left: 8px;
+    }
+    .zotero-ai-note-section-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(12em, 1fr));
+      gap: 8px 24px;
+      margin: 10px 0 4px;
+    }
+    .zotero-ai-note-section-grid > * {
+      padding: 5px 8px;
+      border-radius: 6px;
+      background: var(--material-background20, rgba(128, 128, 128, 0.06));
+    }
+  ]]></html:style>
 
-    <label value="AI 服务" control="zotero-ai-note-provider"/>
-    <html:select id="zotero-ai-note-provider"
-                 preference="extensions.zotero-ai-note.provider">
-      <html:option value="deepseek">DeepSeek</html:option>
-      <html:option value="qwen">Qwen（通义千问）</html:option>
-    </html:select>
+  <groupbox class="zotero-ai-note-card">
+    <label><html:h2 class="zotero-ai-note-title">AI 模型</html:h2></label>
+    <html:p class="zotero-ai-note-lead">选择用于分析 PDF 的 AI 服务。每个服务使用独立的 API Key、API 地址和模型名。</html:p>
 
-    <hbox align="center" style="margin-top: 10px; gap: 10px;">
+    <html:div class="zotero-ai-note-selector">
+      <label value="当前服务" control="zotero-ai-note-provider"/>
+      <html:select id="zotero-ai-note-provider" class="zotero-ai-note-provider-select"
+                   preference="extensions.zotero-ai-note.provider">
+        <html:option value="deepseek">DeepSeek</html:option>
+        <html:option value="qwen">Qwen（通义千问）</html:option>
+        <html:option value="zhipu">智谱 GLM</html:option>
+      </html:select>
+    </html:div>
+
+    <hbox class="zotero-ai-note-test-row" align="center">
       <button id="zotero-ai-note-test-connection"
               label="测试当前模型连接"
               oncommand="ZoteroAINotePreferences.testConnection();"/>
-      <html:span id="zotero-ai-note-test-status" role="status"></html:span>
+      <html:span id="zotero-ai-note-test-status" class="zotero-ai-note-test-status" role="status"></html:span>
     </hbox>
   </groupbox>
 
-  <groupbox>
-    <label><html:h2>DeepSeek</html:h2></label>
+  <groupbox class="zotero-ai-note-card">
+    <label><html:h2 class="zotero-ai-note-title">DeepSeek</html:h2></label>
 
-    <label value="API Key" control="zotero-ai-note-deepseek-api-key"/>
-    <html:input id="zotero-ai-note-deepseek-api-key"
-                type="password"
-                preference="extensions.zotero-ai-note.deepseek.apiKey"
-                placeholder="sk-..."
-                style="width: 32em;"/>
+    <hbox class="zotero-ai-note-field" align="center">
+      <label value="API Key" control="zotero-ai-note-deepseek-api-key"/>
+      <html:input id="zotero-ai-note-deepseek-api-key" class="zotero-ai-note-input zotero-ai-note-key"
+                  type="password" preference="extensions.zotero-ai-note.deepseek.apiKey" placeholder="sk-..."/>
+    </hbox>
 
-    <label value="API 地址" control="zotero-ai-note-deepseek-base-url"/>
-    <html:input id="zotero-ai-note-deepseek-base-url"
-                type="url"
-                preference="extensions.zotero-ai-note.deepseek.baseURL"
-                style="width: 38em;"/>
+    <hbox class="zotero-ai-note-field" align="center">
+      <label value="API 地址" control="zotero-ai-note-deepseek-base-url"/>
+      <html:input id="zotero-ai-note-deepseek-base-url" class="zotero-ai-note-input zotero-ai-note-url"
+                  type="url" preference="extensions.zotero-ai-note.deepseek.baseURL"/>
+    </hbox>
 
-    <label value="模型" control="zotero-ai-note-deepseek-model"/>
-    <html:input id="zotero-ai-note-deepseek-model"
-                type="text"
-                preference="extensions.zotero-ai-note.deepseek.model"
-                style="width: 20em;"/>
+    <hbox class="zotero-ai-note-field" align="center">
+      <label value="模型" control="zotero-ai-note-deepseek-model"/>
+      <html:input id="zotero-ai-note-deepseek-model" class="zotero-ai-note-input zotero-ai-note-model"
+                  type="text" preference="extensions.zotero-ai-note.deepseek.model"/>
+    </hbox>
   </groupbox>
 
-  <groupbox>
-    <label><html:h2>Qwen（阿里云百炼）</html:h2></label>
+  <groupbox class="zotero-ai-note-card">
+    <label><html:h2 class="zotero-ai-note-title">Qwen（阿里云百炼）</html:h2></label>
 
-    <label value="API Key" control="zotero-ai-note-qwen-api-key"/>
-    <html:input id="zotero-ai-note-qwen-api-key"
-                type="password"
-                preference="extensions.zotero-ai-note.qwen.apiKey"
-                placeholder="sk-..."
-                style="width: 32em;"/>
+    <hbox class="zotero-ai-note-field" align="center">
+      <label value="API Key" control="zotero-ai-note-qwen-api-key"/>
+      <html:input id="zotero-ai-note-qwen-api-key" class="zotero-ai-note-input zotero-ai-note-key"
+                  type="password" preference="extensions.zotero-ai-note.qwen.apiKey" placeholder="sk-..."/>
+    </hbox>
 
-    <label value="API 地址" control="zotero-ai-note-qwen-base-url"/>
-    <html:input id="zotero-ai-note-qwen-base-url"
-                type="url"
-                preference="extensions.zotero-ai-note.qwen.baseURL"
-                style="width: 38em;"/>
+    <hbox class="zotero-ai-note-field" align="center">
+      <label value="API 地址" control="zotero-ai-note-qwen-base-url"/>
+      <html:input id="zotero-ai-note-qwen-base-url" class="zotero-ai-note-input zotero-ai-note-url"
+                  type="url" preference="extensions.zotero-ai-note.qwen.baseURL"/>
+    </hbox>
     <html:p>阿里云不同地域可能需要使用包含 Workspace ID 的专属地址，可直接在此修改。</html:p>
 
-    <label value="模型" control="zotero-ai-note-qwen-model"/>
-    <html:input id="zotero-ai-note-qwen-model"
-                type="text"
-                preference="extensions.zotero-ai-note.qwen.model"
-                style="width: 20em;"/>
+    <hbox class="zotero-ai-note-field" align="center">
+      <label value="模型" control="zotero-ai-note-qwen-model"/>
+      <html:input id="zotero-ai-note-qwen-model" class="zotero-ai-note-input zotero-ai-note-model"
+                  type="text" preference="extensions.zotero-ai-note.qwen.model"/>
+    </hbox>
   </groupbox>
 
-  <groupbox>
-    <label><html:h2>总结设置</html:h2></label>
+  <groupbox class="zotero-ai-note-card">
+    <label><html:h2 class="zotero-ai-note-title">智谱 GLM</html:h2></label>
+    <html:p class="zotero-ai-note-lead">默认模型为 GLM-4.7-Flash，模型调用名为 <html:code>glm-4.7-flash</html:code>。</html:p>
+
+    <hbox class="zotero-ai-note-field" align="center">
+      <label value="API Key" control="zotero-ai-note-zhipu-api-key"/>
+      <html:input id="zotero-ai-note-zhipu-api-key" class="zotero-ai-note-input zotero-ai-note-key"
+                  type="password" preference="extensions.zotero-ai-note.zhipu.apiKey" placeholder="智谱 API Key"/>
+    </hbox>
+
+    <hbox class="zotero-ai-note-field" align="center">
+      <label value="API 地址" control="zotero-ai-note-zhipu-base-url"/>
+      <html:input id="zotero-ai-note-zhipu-base-url" class="zotero-ai-note-input zotero-ai-note-url"
+                  type="url" preference="extensions.zotero-ai-note.zhipu.baseURL"/>
+    </hbox>
+
+    <hbox class="zotero-ai-note-field" align="center">
+      <label value="模型" control="zotero-ai-note-zhipu-model"/>
+      <html:input id="zotero-ai-note-zhipu-model" class="zotero-ai-note-input zotero-ai-note-model"
+                  type="text" preference="extensions.zotero-ai-note.zhipu.model"/>
+    </hbox>
+  </groupbox>
+
+  <groupbox class="zotero-ai-note-card">
+    <label><html:h2 class="zotero-ai-note-title">总结设置</html:h2></label>
 
     <label value="输出语言" control="zotero-ai-note-language"/>
     <html:select id="zotero-ai-note-language"
@@ -98,11 +203,11 @@
     <html:p>API Key 仅保存在本机 Zotero 首选项中，但不会被插件加密。</html:p>
   </groupbox>
 
-  <groupbox>
-    <label><html:h2>笔记内容</html:h2></label>
+  <groupbox class="zotero-ai-note-card">
+    <label><html:h2 class="zotero-ai-note-title">笔记内容</html:h2></label>
     <html:p>选择 AI 笔记需要包含的部分。默认全部选中，生成时会按照下列顺序输出。</html:p>
 
-    <html:div style="display: grid; grid-template-columns: repeat(2, minmax(12em, 1fr)); gap: 8px 24px;">
+    <html:div class="zotero-ai-note-section-grid">
       <html:label><html:input type="checkbox" preference="extensions.zotero-ai-note.sections.overview"/> 研究概览</html:label>
       <html:label><html:input type="checkbox" preference="extensions.zotero-ai-note.sections.question"/> 研究问题</html:label>
       <html:label><html:input type="checkbox" preference="extensions.zotero-ai-note.sections.methods"/> 方法与数据</html:label>
