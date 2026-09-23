@@ -41,7 +41,7 @@
       border-radius: 6px;
     }
     .zotero-ai-note-select {
-      width: auto;
+      width: 12em !important;
       min-width: 10em;
       max-width: 100%;
       margin: 4px 0 12px;
@@ -81,9 +81,13 @@
       margin-left: 8px;
     }
     .zotero-ai-note-security-note {
-      margin: 12px 8px 0;
+      margin: 12px 0 0;
       color: var(--fill-secondary, currentColor);
       font-size: 0.85em;
+    }
+    .zotero-ai-note-about p {
+      margin: 3px 0;
+      line-height: 1.35;
     }
     .zotero-ai-note-section-grid {
       display: grid;
@@ -239,14 +243,14 @@
     <html:p>开始总结时至少需要选择一项。</html:p>
   </groupbox>
 
-  <groupbox class="zotero-ai-note-card">
+  <groupbox class="zotero-ai-note-card zotero-ai-note-about">
     <label><html:h2 class="zotero-ai-note-title">关于</html:h2></label>
-    <html:p>版本：0.2.13</html:p>
-    <html:p>项目仓库：<html:a href="https://github.com/nkbaim/zotero-ai-note" target="_blank">github.com/nkbaim/zotero-ai-note</html:a></html:p>
+    <html:p>版本：0.2.14</html:p>
+    <html:p>项目仓库：<html:a href="https://github.com/nkbaim/zotero-ai-note" target="_blank" onclick="ZoteroAINotePreferences.openExternalLink(event);">github.com/nkbaim/zotero-ai-note</html:a></html:p>
     <html:p>
-      <html:a href="https://github.com/nkbaim/zotero-ai-note/releases" target="_blank">版本发布</html:a>
-      · <html:a href="https://github.com/nkbaim/zotero-ai-note/issues" target="_blank">问题反馈</html:a>
-      · <html:a href="https://github.com/nkbaim/zotero-ai-note/blob/main/LICENSE" target="_blank">MIT License</html:a>
+      <html:a href="https://github.com/nkbaim/zotero-ai-note/releases" target="_blank" onclick="ZoteroAINotePreferences.openExternalLink(event);">版本发布</html:a>
+      · <html:a href="https://github.com/nkbaim/zotero-ai-note/issues" target="_blank" onclick="ZoteroAINotePreferences.openExternalLink(event);">问题反馈</html:a>
+      · <html:a href="https://github.com/nkbaim/zotero-ai-note/blob/main/LICENSE" target="_blank" onclick="ZoteroAINotePreferences.openExternalLink(event);">MIT License</html:a>
     </html:p>
   </groupbox>
 </vbox>

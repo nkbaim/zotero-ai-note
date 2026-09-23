@@ -14,6 +14,11 @@ window.ZoteroAINotePreferences = {
     this.setStatus(document.getElementById("zotero-ai-note-test-status"), "", false);
   },
 
+  openExternalLink(event) {
+    event.preventDefault();
+    Zotero.launchURL(event.currentTarget.href);
+  },
+
   async testConnection() {
     const button = document.getElementById("zotero-ai-note-test-connection");
     const status = document.getElementById("zotero-ai-note-test-status");
