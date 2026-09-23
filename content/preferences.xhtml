@@ -7,14 +7,18 @@
       padding: 4px 2px 18px;
     }
     .zotero-ai-note-card {
-      margin: 0 0 8px;
-      padding: 0 4px 12px;
+      margin: 0 0 2px;
+      padding: 2px 4px 8px;
       border: 1px solid var(--material-border, #d6d9df);
       border-radius: 10px;
       background: var(--material-background, rgba(128, 128, 128, 0.045));
     }
+    .zotero-ai-note-card > label {
+      margin: 0;
+      padding: 0;
+    }
     .zotero-ai-note-card .zotero-ai-note-title {
-      margin: 3px 0;
+      margin: 0 0 2px;
       color: var(--fill-primary, currentColor);
       font-size: 1.15em;
     }
@@ -255,7 +259,7 @@
 
   <groupbox class="zotero-ai-note-card zotero-ai-note-about">
     <label><html:h2 class="zotero-ai-note-title">关于</html:h2></label>
-    <html:p>版本：0.2.15</html:p>
+    <html:p>版本：0.2.16</html:p>
     <html:p>项目仓库：<html:a href="https://github.com/nkbaim/zotero-ai-note" target="_blank" onclick="ZoteroAINotePreferences.openExternalLink(event);">github.com/nkbaim/zotero-ai-note</html:a></html:p>
     <html:p>
       <html:a href="https://github.com/nkbaim/zotero-ai-note/releases" target="_blank" onclick="ZoteroAINotePreferences.openExternalLink(event);">版本发布</html:a>
