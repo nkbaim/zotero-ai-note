@@ -9,9 +9,9 @@
     .zotero-ai-note-card {
       margin: 0 0 8px;
       padding: 0 4px 12px;
-      border: 1px solid var(--material-border, #d6d9df);
+      border: 1px solid color-mix(in srgb, var(--material-border, #d6d9df) 75%, #91bfe9);
       border-radius: 10px;
-      background: var(--material-background, rgba(128, 128, 128, 0.045));
+      background: color-mix(in srgb, var(--material-background, #fff) 88%, #cfe7ff);
     }
     .zotero-ai-note-card .zotero-ai-note-title {
       margin: 2px 0 3px;
@@ -25,9 +25,9 @@
     .zotero-ai-note-selector {
       margin: 4px 0 12px;
       padding: 10px 12px;
-      border: 1px solid var(--material-border, #d6d9df);
+      border: 1px solid color-mix(in srgb, var(--material-border, #d6d9df) 75%, #91bfe9);
       border-radius: 8px;
-      background: var(--material-background20, rgba(128, 128, 128, 0.08));
+      background: color-mix(in srgb, var(--material-background20, #f5f5f5) 75%, #cfe7ff);
     }
     .zotero-ai-note-selector label {
       font-weight: 600;
@@ -75,7 +75,7 @@
     .zotero-ai-note-test-row {
       margin-top: 12px;
       padding-top: 10px;
-      border-top: 1px solid var(--material-border, #d6d9df);
+      border-top: 1px solid color-mix(in srgb, var(--material-border, #d6d9df) 75%, #91bfe9);
     }
     .zotero-ai-note-test-status {
       margin-left: 8px;
@@ -88,7 +88,7 @@
     .zotero-ai-note-provider-settings {
       margin-top: 8px;
       padding-top: 8px;
-      border-top: 1px solid var(--material-border, #d6d9df);
+      border-top: 1px solid color-mix(in srgb, var(--material-border, #d6d9df) 75%, #91bfe9);
     }
     .zotero-ai-note-provider-title {
       margin: 0 0 6px;
@@ -108,7 +108,7 @@
     .zotero-ai-note-section-grid > * {
       padding: 5px 8px;
       border-radius: 6px;
-      background: var(--material-background20, rgba(128, 128, 128, 0.06));
+      background: color-mix(in srgb, var(--material-background20, #f5f5f5) 82%, #cfe7ff);
     }
   ]]></html:style>
 
@@ -250,15 +250,15 @@
                 style="width: 10em;"/>
     <html:p>插件只发送提取出的文本。较长 PDF 会保留开头和结尾，并在笔记中标明内容已截断。</html:p>
 
-    <label value="每篇笔记最多输出的 token 数" control="zotero-ai-note-max-output-tokens"/>
-    <html:input id="zotero-ai-note-max-output-tokens"
+    <label value="目标笔记字数" control="zotero-ai-note-target-chars"/>
+    <html:input id="zotero-ai-note-target-chars"
                 type="number"
-                min="1000"
-                max="16000"
-                step="500"
-                preference="extensions.zotero-ai-note.maxOutputTokens"
+                min="200"
+                max="4000"
+                step="100"
+                preference="extensions.zotero-ai-note.targetNoteChars"
                 style="width: 10em;"/>
-    <html:p>默认 3000。首次请求会要求模型留出篇幅余量并覆盖全部所选章节；不会自动重试。若仍被截断或缺少章节，会保存已有内容并在笔记底部提示；可调整章节或上限后重新生成。</html:p>
+    <html:p>默认约 800 字。插件会要求模型尽量达到目标篇幅，同时覆盖全部所选章节；原文信息不足时不会凑字。若仍被截断或缺少章节，会保存已有内容并在笔记底部提示。</html:p>
   </vbox>
 
   <vbox class="zotero-ai-note-card">
@@ -280,7 +280,7 @@
 
   <vbox class="zotero-ai-note-card zotero-ai-note-about">
     <html:h2 class="zotero-ai-note-title">关于</html:h2>
-    <html:p>版本：0.2.18</html:p>
+    <html:p>版本：0.3.0</html:p>
     <html:p>项目仓库：<html:a href="https://github.com/nkbaim/zotero-ai-note" target="_blank" onclick="ZoteroAINotePreferences.openExternalLink(event);">github.com/nkbaim/zotero-ai-note</html:a></html:p>
     <html:p>
       <html:a href="https://github.com/nkbaim/zotero-ai-note/releases" target="_blank" onclick="ZoteroAINotePreferences.openExternalLink(event);">版本发布</html:a>

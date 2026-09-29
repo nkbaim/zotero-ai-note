@@ -18,7 +18,7 @@ const preferences = {
   "extensions.zotero-ai-note.mimo.model": "mimo-v2.6-pro",
   "extensions.zotero-ai-note.language": "中文",
   "extensions.zotero-ai-note.maxChars": 10000,
-  "extensions.zotero-ai-note.maxOutputTokens": 3000,
+  "extensions.zotero-ai-note.targetNoteChars": 800,
   "extensions.zotero-ai-note.sections.overview": true,
   "extensions.zotero-ai-note.sections.question": true,
   "extensions.zotero-ai-note.sections.methods": true,
@@ -104,6 +104,7 @@ const html = plugin.markdownToNoteHTML(
 assert.match(html, /生成人：Alice &lt;Admin&gt;/);
 assert.match(html, /生成时间：2026/);
 assert.match(html, /所用模型：DeepSeek \/ deepseek-flash/);
+assert.match(html, /发送给模型的输入文本经过截断/);
 assert.ok(html.indexOf("<h1>AI 文献总结</h1>") < html.indexOf("生成人："));
 assert.ok(html.indexOf("所用模型：") < html.indexOf("<h3>主要发现</h3>"));
 assert.equal(html.match(/DeepSeek \/ deepseek-flash/g).length, 1);
@@ -150,12 +151,40 @@ assert.ok(warnedHtml.indexOf("⚠️ 内容被截断") < warnedHtml.indexOf("</d
   assert.equal(lastRequest.options.headers.Authorization, "Bearer deepseek-key");
   const body = JSON.parse(lastRequest.options.body);
   assert.equal(body.model, "deepseek-flash");
-  assert.equal(body.max_tokens, 3000);
+  assert.equal(body.max_tokens, 4000);
   assert.deepEqual(body.thinking, { type: "disabled" });
   assert.match(body.messages[1].content, /PDF text/);
   assert.match(body.messages[0].content, /## 研究概览、## 研究问题、## 方法与数据/);
-  assert.match(body.messages[0].content, /2250 token/);
-  assert.match(body.messages[0].content, /每节约 281 token/);
+  assert.match(body.messages[0].content, /约 800 个汉字/);
+  assert.match(body.messages[0].content, /640–960 个汉字/);
+  assert.match(body.messages[0].content, /“研究概览”必须写成一个简短、连贯的正式段落/);
+  assert.match(body.messages[0].content, /其他所选章节可按内容使用短段落或少量项目符号/);
+  assert.doesNotMatch(body.messages[0].content, /“研究问题”必须写成/);
+
+  preferences["extensions.zotero-ai-note.targetNoteChars"] = 2500;
+  await plugin.requestSummary({
+    item: { getField: () => "", getCreators: () => [] },
+    text: "PDF text",
+    truncated: false,
+    originalLength: 8,
+    provider: deepseek
+  });
+  const longNoteBody = JSON.parse(lastRequest.options.body);
+  assert.equal(longNoteBody.max_tokens, 10000);
+  assert.match(longNoteBody.messages[0].content, /约 2500 个汉字/);
+  assert.match(longNoteBody.messages[0].content, /2000–3000 个汉字/);
+  preferences["extensions.zotero-ai-note.targetNoteChars"] = 800;
+
+  preferences["extensions.zotero-ai-note.language"] = "English";
+  await plugin.requestSummary({
+    item: { getField: () => "", getCreators: () => [] },
+    text: "PDF text",
+    truncated: false,
+    originalLength: 8,
+    provider: deepseek
+  });
+  assert.match(JSON.parse(lastRequest.options.body).messages[0].content, /约 800 个英文字符（含空格）/);
+  preferences["extensions.zotero-ai-note.language"] = "中文";
 
   preferences["extensions.zotero-ai-note.sections.keywords"] = false;
   await plugin.requestSummary({
@@ -268,11 +297,13 @@ assert.ok(warnedHtml.indexOf("⚠️ 内容被截断") < warnedHtml.indexOf("</d
     usage: { completion_tokens_details: { reasoning_tokens: 512 } }
   }, "文本内容"), /finish_reason=length.*推理 tokens=512.*仅返回了推理内容/);
 
-  preferences["extensions.zotero-ai-note.maxOutputTokens"] = 4500;
-  assert.equal(plugin.getMaxOutputTokens(), 4500);
-  preferences["extensions.zotero-ai-note.maxOutputTokens"] = 20000;
-  assert.equal(plugin.getMaxOutputTokens(), 16000);
-  preferences["extensions.zotero-ai-note.maxOutputTokens"] = 3000;
+  preferences["extensions.zotero-ai-note.targetNoteChars"] = 4500;
+  assert.equal(plugin.getTargetNoteChars(), 4000);
+  preferences["extensions.zotero-ai-note.targetNoteChars"] = 100;
+  assert.equal(plugin.getTargetNoteChars(), 200);
+  preferences["extensions.zotero-ai-note.targetNoteChars"] = undefined;
+  assert.equal(plugin.getTargetNoteChars(), 800);
+  preferences["extensions.zotero-ai-note.targetNoteChars"] = 800;
 
   queuedResponses.push({
     choices: [{ finish_reason: "stop", message: { content: "## 研究概览\n简洁概览\n## 关键词\n术语" } }],
@@ -294,7 +325,7 @@ assert.ok(warnedHtml.indexOf("⚠️ 内容被截断") < warnedHtml.indexOf("</d
   assert.equal(focused.usage.input, 110);
   assert.equal(focused.usage.output, 80);
   assert.equal(seenUsage.length, 1);
-  assert.match(JSON.parse(requestHistory[focusedStart].options.body).messages[0].content, /每节约 1125 token/);
+  assert.match(JSON.parse(requestHistory[focusedStart].options.body).messages[0].content, /约 800 个汉字/);
   assert.deepEqual(Array.from(plugin.missingSummarySections(focused.summary, ["研究概览", "关键词"])), []);
   assert.deepEqual(Array.from(plugin.missingSummarySections("## 研究概览\n有内容", ["研究概览", "关键词"])), ["关键词"]);
 
@@ -311,6 +342,7 @@ assert.ok(warnedHtml.indexOf("⚠️ 内容被截断") < warnedHtml.indexOf("</d
   assert.equal(incomplete.summary, "## 研究概览\n概览");
   assert.match(incomplete.warning, /未完整覆盖所选章节：关键词/);
   assert.match(incomplete.warning, /减少“笔记内容”的勾选项/);
+  assert.match(incomplete.warning, /降低“目标笔记字数”/);
   assert.equal(requestHistory.length - incompleteStart, 1);
 
   queuedResponses.push({ choices: [{ finish_reason: "length", message: { content: "## 研究概览\n截断" } }] });

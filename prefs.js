@@ -13,7 +13,7 @@ pref("extensions.zotero-ai-note.mimo.baseURL", "https://api.xiaomimimo.com/v1");
 pref("extensions.zotero-ai-note.mimo.model", "mimo-v2.6-pro");
 pref("extensions.zotero-ai-note.language", "中文");
 pref("extensions.zotero-ai-note.maxChars", 120000);
-pref("extensions.zotero-ai-note.maxOutputTokens", 3000);
+pref("extensions.zotero-ai-note.targetNoteChars", 800);
 pref("extensions.zotero-ai-note.sections.overview", true);
 pref("extensions.zotero-ai-note.sections.question", true);
 pref("extensions.zotero-ai-note.sections.methods", true);
